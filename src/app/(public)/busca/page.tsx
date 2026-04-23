@@ -12,7 +12,6 @@ function BuscaContent() {
   const params = useSearchParams()
   const router = useRouter()
   const { data: session } = useSession()
-  const isWholesale = session?.user?.role === "WHOLESALE" && (session?.user as any)?.wholesaleApproved
 
   const [query, setQuery] = useState(params.get("q") ?? "")
   const [products, setProducts] = useState<any[]>([])
@@ -71,7 +70,7 @@ function BuscaContent() {
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {products.map((p) => (
-                <ProductCard key={p.id} product={p} isWholesale={isWholesale} />
+                <ProductCard key={p.id} {...p} />
               ))}
             </div>
           </>
