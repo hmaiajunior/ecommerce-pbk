@@ -1,13 +1,16 @@
 import { Resend } from "resend"
 
-const resend = new Resend(process.env.RESEND_API_KEY)
 const FROM = process.env.EMAIL_FROM ?? "noreply@playbekids.com.br"
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
+
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY)
+}
 
 export async function sendPasswordResetEmail(email: string, token: string) {
   const resetUrl = `${APP_URL}/resetar-senha?token=${token}`
 
-  await resend.emails.send({
+  await getResend().emails.send({
     from: FROM,
     to: email,
     subject: "Redefinir senha — Playbekids",
@@ -21,7 +24,7 @@ export async function sendPasswordResetEmail(email: string, token: string) {
 }
 
 export async function sendWholesaleApprovalEmail(email: string, name: string) {
-  await resend.emails.send({
+  await getResend().emails.send({
     from: FROM,
     to: email,
     subject: "Conta atacado aprovada — Playbekids",
@@ -40,7 +43,7 @@ export async function sendOrderConfirmationEmail(
 ) {
   const orderUrl = `${APP_URL}/minha-conta/pedidos/${orderId}`
 
-  await resend.emails.send({
+  await getResend().emails.send({
     from: FROM,
     to: email,
     subject: `Pedido confirmado #${orderId.slice(-8).toUpperCase()} — Playbekids`,

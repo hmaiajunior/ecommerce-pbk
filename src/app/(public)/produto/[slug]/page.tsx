@@ -1,20 +1,11 @@
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
+import { auth } from "@/lib/auth"
+import { getProductBySlug } from "@/lib/data/products"
 import { ProductDetail } from "@/components/shop/ProductDetail"
 import { ProductCard } from "@/components/shop/ProductCard"
 
 export const revalidate = 300
-
-const BASE = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
-
-async function getProduct(slug: string) {
-  const res = await fetch(`${BASE}/api/products/${slug}`, {
-    next: { revalidate: 300 },
-  })
-  if (!res.ok) return null
-  const json = await res.json()
-  return json.data ?? null
-}
 
 export async function generateMetadata({
   params,
@@ -22,7 +13,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
-  const product = await getProduct(slug)
+  const product = await getProductBySlug(slug)
   if (!product) return { title: "Produto não encontrado" }
   return {
     title: product.name,
@@ -36,13 +27,17 @@ export default async function ProductPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const product = await getProduct(slug)
+
+  const session = await auth()
+  const isWholesale =
+    session?.user.role === "WHOLESALE" && session.user.wholesaleApproved === true
+
+  const product = await getProductBySlug(slug)
 
   if (!product) notFound()
 
   return (
     <div className="mx-auto max-w-7xl px-4 md:px-8 py-10">
-      {/* Produto */}
       <ProductDetail
         id={product.id}
         name={product.name}
@@ -50,8 +45,8 @@ export default async function ProductPage({
         description={product.description}
         fabric={product.fabric}
         retailPrice={Number(product.retailPrice)}
-        wholesalePrice={product.wholesalePrice ? Number(product.wholesalePrice) : null}
-        wholesaleMinQty={product.wholesaleMinQty ?? null}
+        wholesalePrice={isWholesale && product.wholesalePrice ? Number(product.wholesalePrice) : null}
+        wholesaleMinQty={isWholesale ? product.wholesaleMinQty ?? null : null}
         featured={product.featured}
         images={product.images}
         sizes={product.sizes}
@@ -59,7 +54,6 @@ export default async function ProductPage({
         ageRange={product.ageRange}
       />
 
-      {/* Produtos relacionados */}
       {product.related?.length > 0 && (
         <section className="mt-16">
           <h2 className="font-black text-[24px] text-brown-dark mb-6">

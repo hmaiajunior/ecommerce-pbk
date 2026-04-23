@@ -6,13 +6,14 @@ import { Pagination } from "@/components/shop/Pagination"
 import { ActiveFilters } from "@/components/shop/ActiveFilters"
 import { ProductCard } from "@/components/shop/ProductCard"
 import { Skeleton } from "@/components/ui/skeleton"
+import { auth } from "@/lib/auth"
+import { getProductsList, productQuerySchema, maskWholesale } from "@/lib/data/products"
+import { getCategories, getAgeRanges } from "@/lib/data/catalog"
 import type { Metadata } from "next"
 
 export const revalidate = 300
 
 export const metadata: Metadata = { title: "Loja" }
-
-// ─── Tipos ────────────────────────────────────────────────────────
 
 type SearchParams = Promise<{
   category?: string
@@ -23,30 +24,6 @@ type SearchParams = Promise<{
   sort?: string
   page?: string
 }>
-
-// ─── Fetches ──────────────────────────────────────────────────────
-
-const BASE = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
-
-async function getProducts(sp: Awaited<SearchParams>) {
-  const url = new URL(`${BASE}/api/products`)
-  const keys = ["category", "ageRange", "size", "minPrice", "maxPrice", "sort", "page"] as const
-  keys.forEach((k) => { if (sp[k]) url.searchParams.set(k, sp[k]!) })
-  const res = await fetch(url.toString(), { next: { revalidate: 300 } })
-  if (!res.ok) return { data: [], meta: { total: 0, pages: 0, page: 1, limit: 24 } }
-  return res.json()
-}
-
-async function getFiltersData() {
-  const [catsRes, agesRes] = await Promise.all([
-    fetch(`${BASE}/api/categories`,  { next: { revalidate: 300 } }),
-    fetch(`${BASE}/api/age-ranges`,  { next: { revalidate: 300 } }),
-  ])
-  const [cats, ages] = await Promise.all([catsRes.json(), agesRes.json()])
-  return { categories: cats.data ?? [], ageRanges: ages.data ?? [] }
-}
-
-// ─── Skeletons ────────────────────────────────────────────────────
 
 function GridSkeleton() {
   return (
@@ -80,22 +57,29 @@ function SidebarSkeleton() {
   )
 }
 
-// ─── Conteúdo dinâmico (dentro do Suspense) ───────────────────────
-
 async function CatalogContent({ searchParams }: { searchParams: Awaited<SearchParams> }) {
-  const [{ data: products, meta }, { categories, ageRanges }] = await Promise.all([
-    getProducts(searchParams),
-    getFiltersData(),
+  const parsed = productQuerySchema.safeParse(searchParams)
+  const params = parsed.success ? parsed.data : productQuerySchema.parse({})
+
+  const session = await auth()
+  const isWholesale =
+    session?.user.role === "WHOLESALE" && session.user.wholesaleApproved === true
+
+  const [{ products: rawProducts, total, pages }, categories, ageRanges] = await Promise.all([
+    getProductsList(params),
+    getCategories(),
+    getAgeRanges(),
   ])
+
+  const products = rawProducts.map((p) => maskWholesale(p, isWholesale))
+  const meta = { total, pages, page: params.page, limit: params.limit }
 
   return (
     <div className="flex gap-8 items-start">
-      {/* Sidebar desktop */}
       <div className="hidden lg:block">
         <FilterSidebar categories={categories} ageRanges={ageRanges} />
       </div>
 
-      {/* Grid + paginação */}
       <div className="flex-1 min-w-0">
         {products.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 gap-4">
@@ -118,8 +102,6 @@ async function CatalogContent({ searchParams }: { searchParams: Awaited<SearchPa
   )
 }
 
-// ─── Página ───────────────────────────────────────────────────────
-
 export default async function ProdutosPage({
   searchParams,
 }: {
@@ -127,12 +109,13 @@ export default async function ProdutosPage({
 }) {
   const sp = await searchParams
 
-  // Carrega dados de filtro para o header e filtros ativos
-  const { categories, ageRanges } = await getFiltersData()
+  const [categories, ageRanges] = await Promise.all([
+    getCategories(),
+    getAgeRanges(),
+  ])
 
   return (
     <div className="mx-auto max-w-7xl px-4 md:px-8 py-10">
-      {/* Cabeçalho da página */}
       <div className="mb-6">
         <h1 className="font-black text-[32px] text-brown-dark">Loja</h1>
         <p className="font-semibold text-brown-muted mt-1">
@@ -140,15 +123,12 @@ export default async function ProdutosPage({
         </p>
       </div>
 
-      {/* Barra de ações */}
       <div className="flex flex-col sm:flex-row gap-3 justify-between items-start sm:items-center mb-4">
-        {/* Filtros ativos */}
         <Suspense>
           <ActiveFilters categories={categories} ageRanges={ageRanges} />
         </Suspense>
 
         <div className="flex items-center gap-3 shrink-0 ml-auto">
-          {/* Filtros mobile */}
           <details className="lg:hidden">
             <summary className="flex items-center gap-2 font-bold text-sm text-brown-mid bg-bg-blush px-4 py-2.5 rounded-pill cursor-pointer list-none hover:bg-bg-nude transition-colors">
               <SlidersHorizontal size={14} /> Filtros
@@ -158,14 +138,12 @@ export default async function ProdutosPage({
             </div>
           </details>
 
-          {/* Ordenação */}
           <Suspense>
             <SortSelect />
           </Suspense>
         </div>
       </div>
 
-      {/* Grid + sidebar */}
       <Suspense
         fallback={
           <div className="flex gap-8">

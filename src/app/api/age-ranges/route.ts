@@ -1,12 +1,7 @@
 import { NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
-import { withCache } from "@/lib/cache"
-import { TTL } from "@/lib/redis"
+import { getAgeRanges } from "@/lib/data/catalog"
 
 export async function GET() {
-  const ageRanges = await withCache("age-ranges:all", TTL.product, () =>
-    prisma.ageRange.findMany({ orderBy: { minAge: "asc" } })
-  )
-
+  const ageRanges = await getAgeRanges()
   return NextResponse.json({ data: ageRanges })
 }
