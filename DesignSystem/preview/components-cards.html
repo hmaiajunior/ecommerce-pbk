@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Nunito', sans-serif; background: #fff9f0; padding: 20px; display: flex; gap: 16px; }
+  .card { background: #fff; border-radius: 20px; overflow: hidden; width: 180px; box-shadow: 0 2px 16px rgba(61,43,31,0.10); flex-shrink: 0; }
+  .img { width: 100%; height: 140px; background: #f5ede8; position: relative; display: flex; align-items: center; justify-content: center; }
+  .img-placeholder { font-size: 36px; opacity: .4; }
+  .badge { position: absolute; top: 10px; left: 10px; background: #FF6B4A; color: #fff; font-size: 10px; font-weight: 900; padding: 4px 10px; border-radius: 100px; }
+  .body { padding: 12px; }
+  .name { font-size: 13px; font-weight: 800; color: #3D2B1F; margin-bottom: 4px; }
+  .sizes { display: flex; gap: 4px; margin-bottom: 8px; }
+  .size { font-size: 10px; font-weight: 700; color: #9A7B70; background: #f5ede8; padding: 2px 7px; border-radius: 100px; }
+  .price-row { display: flex; align-items: baseline; gap: 6px; }
+  .price { font-size: 16px; font-weight: 900; color: #FF6B4A; }
+  .price-old { font-size: 11px; font-weight: 700; color: #A08078; text-decoration: line-through; }
+  .btn { width: 100%; margin-top: 10px; background: #FF6B4A; color: #fff; border: none; border-radius: 100px; padding: 8px; font-family: 'Nunito',sans-serif; font-size: 12px; font-weight: 900; cursor: pointer; box-shadow: 0 4px 14px rgba(255,107,74,.25); }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="img"><div class="img-placeholder">👕</div><div class="badge">Novo</div></div>
+    <div class="body">
+      <div class="name">Camiseta Surfista</div>
+      <div class="sizes"><span class="size">2</span><span class="size">4</span><span class="size">6</span><span class="size">8</span></div>
+      <div class="price-row"><span class="price">R$49,90</span><span class="price-old">R$69,90</span></div>
+      <button class="btn">Comprar</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="img" style="background:#EDE0DC"><div class="img-placeholder">👖</div><div class="badge" style="background:#4EC9C0">Atacado</div></div>
+    <div class="body">
+      <div class="name">Bermuda Cargo</div>
+      <div class="sizes"><span class="size">4</span><span class="size">6</span><span class="size">8</span><span class="size">10</span></div>
+      <div class="price-row"><span class="price">R$39,90</span></div>
+      <button class="btn" style="background:#4EC9C0;box-shadow:0 4px 14px rgba(78,201,192,.30)">Comprar</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="img" style="background:#fff3d6"><div class="img-placeholder">🧢</div></div>
+    <div class="body">
+      <div class="name">Boné Estampado</div>
+      <div class="sizes"><span class="size">Único</span></div>
+      <div class="price-row"><span class="price" style="color:#A08078;font-size:12px">Esgotado</span></div>
+      <button class="btn" style="background:#EDE0DC;color:#A08078;box-shadow:none;cursor:not-allowed" disabled>Indisponível</button>
+    </div>
+  </div>
+</body></html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-cc-id="cc-2"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<style data-omelette-injected="">html,body{background:transparent}</style><script data-omelette-injected="">(()=>{var $=["https://claude.ai","https://preview.claude.ai","https://eap-omelette.claude.ai"];var F=30000;var A=3000;document.addEventListener("DOMContentLoaded",()=>{const Q="transform-react-jsx-source";document.querySelectorAll('script[type="text/babel"],script[type="text/jsx"]').forEach((J,V)=>{const X=J.getAttribute("data-plugins")||"";if(X.indexOf(Q)<0){J.setAttribute("data-plugins",X?`${X},${Q}`:Q)}if(!J.hasAttribute("data-filename")){J.setAttribute("data-filename",J.getAttribute("src")||`inline-${V}`)}})});var W=window.parent;if(W&&W!==window){const Q=(z,k)=>{try{W.postMessage({__omelette_log:true,type:z,data:k},"*")}catch{}};["log","warn","error"].forEach((z)=>{const k=console[z];console[z]=(...C)=>{const D=C.map((w)=>{try{return typeof w==="object"?JSON.stringify(w):String(w)}catch{try{return String(w)}catch{return"[unstringifiable]"}}}).join(" ");Q(z,D);k.apply(console,C)}});window.addEventListener("error",(z)=>{const k=z.target;if(k&&k!==window&&k.tagName){const C=k.src||k.href||"";Q("resource_error",`${k.tagName} failed to load: ${C}`)}else{Q("error",`${z.message||"Unknown error"} at ${z.filename||"?"}:${z.lineno||0}:${z.colno||0}`)}},true);window.addEventListener("unhandledrejection",(z)=>{const k=z.reason;const C=k instanceof Error?`${k.message} ${k.stack}`:String(k);Q("error",`Unhandled rejection: ${C}`)});const J=()=>{try{W.postMessage({type:"omelette:height",height:document.documentElement.scrollHeight},"*")}catch{}};if(document.readyState==="complete")J();else window.addEventListener("load",J);if(window.ResizeObserver)new ResizeObserver(J).observe(document.documentElement);const V={};let X=0;window.claude={complete(z){return new Promise((k,C)=>{if(!$.length){C(new Error("claude.complete: no parent origin"));return}const D=`c${++X}`;const w=()=>setTimeout(()=>{delete V[D];C(new Error(`claude.complete: no data for ${F/1000}s`))},F);const K=w();V[D]={resolve:k,reject:C,text:"",t:K,arm:w};try{for(const Z of $){W.postMessage({__om_api:true,id:D,body:z},Z)}}catch(Z){clearTimeout(K);delete V[D];C(Z)}})}};const Y={};let h=0;window.omelette={writeFile:(z,k)=>new Promise((C,D)=>{if(!$.length){C();return}const w=`f${++h}`;const K=setTimeout(()=>{delete Y[w];C()},A);Y[w]={resolve:C,reject:D,t:K};try{for(const Z of $){W.postMessage({__om_file:true,id:w,op:"write",path:z,content:k},Z)}}catch{clearTimeout(K);delete Y[w];C()}})};const b=(z)=>{try{return JSON.stringify(z)}catch{return JSON.stringify(String(z))}};window.addEventListener("message",(z)=>{if($.indexOf(z.origin)<0)return;if(z.source!==W)return;const k=z.data;if(!k)return;if(k.__om_file_r){const w=Y[k.id];if(!w)return;clearTimeout(w.t);delete Y[k.id];if(k.ok)w.resolve();else w.reject(new Error(k.error||"write failed"));return}if(k.__om_api_r){const w=V[k.id];if(!w)return;if(k.error!=null){clearTimeout(w.t);delete V[k.id];w.reject(new Error(k.error));return}if(k.chunk!=null){clearTimeout(w.t);w.t=w.arm();w.text+=k.chunk;return}if(k.done){clearTimeout(w.t);delete V[k.id];w.resolve(k.text!=null?k.text:w.text);return}return}if(!k.__om_eval)return;const C=k;const D=(w)=>{z.source.postMessage({...w,__om_eval_r:1,id:C.id},z.origin)};try{const w=(0,eval)(C.code);if(w&&typeof w.then==="function"){w.then((K)=>D({ok:1,v:b(K)}),(K)=>D({ok:0,e:String(K)}))}else{D({ok:1,v:b(w)})}}catch(w){D({ok:0,e:String(w)})}})}})();
+</script>
+
+<meta charset="UTF-8">
+<title>PlayBeKids – Post Feed</title>
+<link href="post-feed_data_002/css2.css" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1080px;
+    height: 1080px;
+    overflow: hidden;
+    font-family: 'Nunito', sans-serif;
+  }
+
+  .card {
+    width: 1080px;
+    height: 1080px;
+    position: relative;
+    background: #fff9f0;
+    overflow: hidden;
+  }
+
+  /* Background blobs */
+  .blob { position: absolute; border-radius: 50%; filter: blur(80px); pointer-events: none; }
+  .b1 { width: 500px; height: 500px; background: #FF6B4A; opacity:.13; top:-150px; left:-150px; }
+  .b2 { width: 450px; height: 450px; background: #FFD340; opacity:.15; bottom:-120px; right:-120px; }
+  .b3 { width: 300px; height: 300px; background: #4EC9C0; opacity:.13; top:350px; right:-60px; }
+
+  /* Decorative dots */
+  .dot { position: absolute; border-radius: 50%; pointer-events: none; }
+
+  /* Main layout using absolute positioning for reliability */
+  .logo-wrap {
+    position: absolute;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: #f5ede8;
+    overflow: hidden;
+    box-shadow: 0 6px 28px rgba(0,0,0,0.13);
+  }
+  .logo-wrap img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    object-position: 50% 38%;
+  }
+
+  .tag {
+    position: absolute;
+    top: 262px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #FF6B4A;
+    color: #fff;
+    font-size: 26px;
+    font-weight: 800;
+    padding: 10px 32px;
+    border-radius: 100px;
+    white-space: nowrap;
+  }
+
+  h1 {
+    position: absolute;
+    top: 336px;
+    width: 100%;
+    text-align: center;
+    font-size: 60px;
+    font-weight: 900;
+    color: #3D2B1F;
+    line-height: 1.2;
+  }
+  h1 span { color: #E05A38; }
+
+  .subtitle {
+    position: absolute;
+    top: 600px;
+    width: 100%;
+    text-align: center;
+    font-size: 30px;
+    font-weight: 600;
+    color: #6B4F42;
+    line-height: 1.55;
+    padding: 0 100px;
+  }
+
+  .accounts {
+    position: absolute;
+    top: 732px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    white-space: nowrap;
+  }
+
+  .account-chip { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .chip-label { font-size: 20px; font-weight: 700; color: #9A7B70; text-transform: uppercase; letter-spacing: 1px; }
+  .chip { padding: 14px 34px; border-radius: 100px; font-size: 30px; font-weight: 900; }
+  .chip-old { background: #EDE0DC; color: #A08078; text-decoration: line-through; }
+  .chip-new { background: #4EC9C0; color: #fff; box-shadow: 0 4px 18px rgba(78,201,192,0.35); }
+  .arrow { font-size: 42px; color: #FFD340; margin-top: 26px; }
+
+  .footer {
+    position: absolute;
+    bottom: 60px;
+    width: 100%;
+    text-align: center;
+    font-size: 28px;
+    font-weight: 800;
+    color: #3D7EBF;
+  }
+</style>
+</head>
+<body style="cursor: crosshair;" data-cc-id="cc-1">
+<div class="card" data-cc-id="cc-3">
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
+
+  <div class="dot" style="width:16px;height:16px;background:#FF6B4A;opacity:.3;top:90px;left:200px;"></div>
+  <div class="dot" style="width:12px;height:12px;background:#FFD340;opacity:.5;top:190px;right:220px;"></div>
+  <div class="dot" style="width:18px;height:18px;background:#4EC9C0;opacity:.3;bottom:160px;left:170px;"></div>
+  <div class="dot" style="width:14px;height:14px;background:#4A90D9;opacity:.4;bottom:100px;right:190px;"></div>
+  <div class="dot" style="width:10px;height:10px;background:#FF6B4A;opacity:.3;top:460px;left:80px;"></div>
+  <div class="dot" style="width:16px;height:16px;background:#FFD340;opacity:.35;top:330px;right:90px;"></div>
+
+  <div class="logo-wrap">
+    <img src="post-feed_data_002/logo-1776809260282.jpeg" alt="PlayBeKids">
+  </div>
+
+  <div class="tag">⚠️ Aviso importante</div>
+
+  <h1>Perdemos o acesso ao<br><span>Instagram principal</span></h1>
+
+  <div class="subtitle">
+    Estamos trabalhando para recuperar a conta.<br>
+    Enquanto isso, nos siga na nossa conta reserva!
+  </div>
+
+  <div class="accounts">
+    <div class="account-chip">
+      <span class="chip-label">conta antiga</span>
+      <div class="chip chip-old">@playbekids</div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="account-chip">
+      <span class="chip-label">nova conta 🌟</span>
+      <div class="chip chip-new">@playbekids2</div>
+    </div>
+  </div>
+
+  <div class="footer">Obrigada pela compreensão! 💛</div>
+</div>
+
+
+<div style="position: fixed; pointer-events: none; border: 2px solid rgb(16, 185, 129); border-radius: 4px; z-index: 99999; left: -2px; top: -2px; width: 1524px; height: 1084px; display: block;" data-designer-overlay="1"></div><div style="position: fixed; pointer-events: none; border: 2px solid rgb(139, 92, 246); border-radius: 4px; z-index: 99999; left: -2px; top: -2px; width: 1084px; height: 1084px; display: block;" data-designer-overlay="1"></div></body></html>

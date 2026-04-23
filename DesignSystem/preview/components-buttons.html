@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Nunito', sans-serif; background: #fff9f0; padding: 20px; }
+  .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 14px; }
+  .label { font-size: 10px; font-weight: 800; color: #9A7B70; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+  .btn { border: none; cursor: pointer; font-family: 'Nunito', sans-serif; font-weight: 900; border-radius: 100px; }
+  .btn-lg { font-size: 18px; padding: 14px 32px; }
+  .btn-md { font-size: 15px; padding: 10px 24px; }
+  .btn-sm { font-size: 12px; padding: 7px 16px; }
+  .btn-primary { background: #FF6B4A; color: #fff; box-shadow: 0 4px 18px rgba(255,107,74,.30); }
+  .btn-secondary { background: #4EC9C0; color: #fff; box-shadow: 0 4px 18px rgba(78,201,192,.35); }
+  .btn-outline { background: transparent; color: #FF6B4A; border: 2.5px solid #FF6B4A; }
+  .btn-ghost { background: #EDE0DC; color: #6B4F42; }
+  .btn-disabled { background: #EDE0DC; color: #A08078; cursor: not-allowed; }
+</style>
+</head>
+<body>
+  <div class="label">Sizes</div>
+  <div class="row">
+    <button class="btn btn-primary btn-lg">Comprar agora</button>
+    <button class="btn btn-primary btn-md">Comprar agora</button>
+    <button class="btn btn-primary btn-sm">Comprar agora</button>
+  </div>
+  <div class="label">Variants</div>
+  <div class="row">
+    <button class="btn btn-primary btn-md">Primary</button>
+    <button class="btn btn-secondary btn-md">Secondary</button>
+    <button class="btn btn-outline btn-md">Outline</button>
+    <button class="btn btn-ghost btn-md">Ghost</button>
+    <button class="btn btn-disabled btn-md" disabled>Disabled</button>
+  </div>
+</body></html>

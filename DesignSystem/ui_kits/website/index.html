@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Playbekids — UI Kit</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: #fff9f0; font-family: 'Nunito', sans-serif; }
+  #root { min-height: 100vh; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" src="Header.jsx" data-filename="Header.jsx"></script>
+<script type="text/babel" src="Hero.jsx" data-filename="Hero.jsx"></script>
+<script type="text/babel" src="ProductCard.jsx" data-filename="ProductCard.jsx"></script>
+<script type="text/babel" src="Footer.jsx" data-filename="Footer.jsx"></script>
+
+<script type="text/babel">
+const { useState } = React;
+
+// ── DATA ───────────────────────────────────────────────
+const PRODUCTS = [
+  { id:1, name:'Camiseta Surfista', emoji:'👕', bg:'#f5ede8', badge:'Novo', sizes:['2','4','6','8','10'], price:'R$49,90', priceOld:'R$69,90' },
+  { id:2, name:'Bermuda Cargo', emoji:'👖', bg:'#EDE0DC', badge:'Atacado', sizes:['4','6','8','10','12'], price:'R$39,90' },
+  { id:3, name:'Conjunto Tropical', emoji:'🩳', bg:'#fff3d6', badge:'Promoção', sizes:['2','4','6'], price:'R$79,90', priceOld:'R$109,90' },
+  { id:4, name:'Boné Estampado', emoji:'🧢', bg:'#e8f5f5', badge:null, sizes:['Único'], price:'R$29,90' },
+  { id:5, name:'Regata Esportiva', emoji:'🏃', bg:'#f5ede8', badge:'Novo', sizes:['4','6','8','10'], price:'R$34,90' },
+  { id:6, name:'Moletom Astronauta', emoji:'🚀', bg:'#EDE0DC', badge:'Esgotado', sizes:['6','8'], price:'R$89,90', soldOut:true },
+];
+
+const appStyles = {
+  page: { minHeight: '100vh', background: '#fff9f0' },
+  section: { padding: '56px 64px' },
+  sectionTitle: {
+    fontFamily: "'Nunito',sans-serif", fontWeight: 900, fontSize: 32, color: '#3D2B1F',
+    marginBottom: 6,
+  },
+  sectionSub: {
+    fontFamily: "'Nunito',sans-serif", fontWeight: 600, fontSize: 16, color: '#9A7B70',
+    marginBottom: 32,
+  },
+  grid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+    gap: 24,
+  },
+  promoStrip: {
+    background: '#FF6B4A',
+    padding: '28px 64px',
+    display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 20,
+  },
+  promoText: {
+    fontFamily: "'Nunito',sans-serif", fontWeight: 900, fontSize: 22, color: '#fff',
+  },
+  promoSub: {
+    fontFamily: "'Nunito',sans-serif", fontWeight: 600, fontSize: 15, color: 'rgba(255,255,255,.8)',
+    marginTop: 4,
+  },
+  promoBtn: {
+    background: '#FFD340', color: '#3D2B1F', border: 'none', borderRadius: 100,
+    padding: '12px 28px', fontFamily: "'Nunito',sans-serif", fontWeight: 900, fontSize: 16,
+    cursor: 'pointer',
+  },
+  // Product detail
+  detailWrap: { display: 'flex', gap: 48, flexWrap: 'wrap', alignItems: 'flex-start' },
+  detailImg: {
+    width: 380, height: 380, borderRadius: 24, background: '#f5ede8',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    fontSize: 120, flexShrink: 0, boxShadow: '0 4px 28px rgba(61,43,31,0.10)',
+  },
+  detailInfo: { flex: 1, minWidth: 260 },
+  detailBadge: {
+    display: 'inline-block', background: '#FFD340', color: '#3D2B1F',
+    fontFamily: "'Nunito',sans-serif", fontWeight: 900, fontSize: 12,
+    padding: '4px 14px', borderRadius: 100, textTransform: 'uppercase',
+    letterSpacing: '.06em', marginBottom: 16,
+  },
+  detailName: {
+    fontFamily: "'Nunito',sans-serif", fontWeight: 900, fontSize: 36, color: '#3D2B1F',
+    marginBottom: 10,
+  },
+  detailDesc: {
+    fontFamily: "'Nunito',sans-serif", fontWeight: 600, fontSize: 16, color: '#6B4F42',
+    lineHeight: 1.6, marginBottom: 24,
+  },
+  detailPriceRow: { display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 24 },
+  detailPrice: { fontFamily: "'Nunito',sans-serif", fontWeight: 900, fontSize: 36, color: '#FF6B4A' },
+  detailOld: { fontFamily: "'Nunito',sans-serif", fontWeight: 700, fontSize: 18, color: '#A08078', textDecoration: 'line-through' },
+  sizeLabel: { fontFamily: "'Nunito',sans-serif", fontWeight: 800, fontSize: 14, color: '#9A7B70', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 10 },
+  sizeRow: { display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 28 },
+  sizeBtn: {
+    fontFamily: "'Nunito',sans-serif", fontWeight: 800, fontSize: 15,
+    border: '2px solid #EDE0DC', borderRadius: 100, padding: '8px 18px',
+    background: '#fff', cursor: 'pointer', color: '#3D2B1F',
+  },
+  sizeBtnActive: { borderColor: '#FF6B4A', background: '#FF6B4A', color: '#fff' },
+  addBtn: {
+    background: '#FF6B4A', color: '#fff', border: 'none', borderRadius: 100,
+    padding: '16px 40px', fontFamily: "'Nunito',sans-serif", fontWeight: 900, fontSize: 18,
+    cursor: 'pointer', boxShadow: '0 6px 22px rgba(255,107,74,.30)', marginRight: 12,
+  },
+  wishBtn: {
+    background: '#f5ede8', color: '#FF6B4A', border: 'none', borderRadius: 100,
+    padding: '16px 24px', fontFamily: "'Nunito',sans-serif", fontWeight: 900, fontSize: 18,
+    cursor: 'pointer',
+  },
+  // Atacado page
+  atacadoHero: {
+    background: '#3D2B1F', padding: '64px',
+    display: 'flex', flexDirection: 'column', alignItems: 'flex-start',
+    position: 'relative', overflow: 'hidden',
+  },
+  atacadoTitle: { fontFamily: "'Nunito',sans-serif", fontWeight: 900, fontSize: 48, color: '#fff', marginBottom: 16 },
+  atacadoSub: { fontFamily: "'Nunito',sans-serif", fontWeight: 600, fontSize: 20, color: '#9A7B70', marginBottom: 32, maxWidth: 560, lineHeight: 1.5 },
+  atacadoBtn: {
+    background: '#FFD340', color: '#3D2B1F', border: 'none', borderRadius: 100,
+    padding: '14px 32px', fontFamily: "'Nunito',sans-serif", fontWeight: 900, fontSize: 18, cursor: 'pointer',
+  },
+  infoCards: { display: 'flex', gap: 20, flexWrap: 'wrap', marginTop: 40 },
+  infoCard: {
+    flex: 1, minWidth: 200, background: '#fff', borderRadius: 20,
+    padding: '24px', boxShadow: '0 2px 16px rgba(61,43,31,0.09)',
+  },
+  infoIcon: { fontSize: 32, marginBottom: 12 },
+  infoTitle: { fontFamily: "'Nunito',sans-serif", fontWeight: 900, fontSize: 18, color: '#3D2B1F', marginBottom: 6 },
+  infoDesc: { fontFamily: "'Nunito',sans-serif", fontWeight: 600, fontSize: 14, color: '#6B4F42', lineHeight: 1.6 },
+};
+
+// ── PAGES ───────────────────────────────────────────────
+
+function HomePage({ setPage }) {
+  const [cartCount, setCartCount] = useState(0);
+  return (
+    <div>
+      <Hero setPage={setPage} />
+      {/* Promo strip */}
+      <div style={appStyles.promoStrip}>
+        <div>
+          <div style={appStyles.promoText}>Frete grátis acima de R$150 🚚</div>
+          <div style={appStyles.promoSub}>Para todo o Brasil · Enviamos todo o Brasil</div>
+        </div>
+        <button style={appStyles.promoBtn} onClick={() => setPage('shop')}>Ver coleção</button>
+      </div>
+      {/* Product grid */}
+      <div style={appStyles.section}>
+        <div style={appStyles.sectionTitle}>Nova Coleção</div>
+        <div style={appStyles.sectionSub}>Peças frescas para os pequenos aventureiros</div>
+        <div style={appStyles.grid}>
+          {PRODUCTS.slice(0,4).map(p => (
+            <ProductCard key={p.id} product={p}
+              onAddToCart={() => setCartCount(c => c + 1)} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ShopPage({ setPage }) {
+  const [filter, setFilter] = useState('Todos');
+  const filters = ['Todos','Camisetas','Bermudas','Conjuntos','Acessórios'];
+  return (
+    <div style={appStyles.section}>
+      <div style={appStyles.sectionTitle}>Loja</div>
+      <div style={appStyles.sectionSub}>Tudo para o pequeno aventureiro</div>
+      {/* Filter row */}
+      <div style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:32}}>
+        {filters.map(f => (
+          <button key={f} onClick={() => setFilter(f)}
+            style={{
+              fontFamily:"'Nunito',sans-serif", fontWeight:800, fontSize:14,
+              border:'none', borderRadius:100, padding:'8px 20px', cursor:'pointer',
+              background: filter===f ? '#FF6B4A' : '#f5ede8',
+              color: filter===f ? '#fff' : '#6B4F42',
+              boxShadow: filter===f ? '0 4px 14px rgba(255,107,74,.25)' : 'none',
+            }}>
+            {f}
+          </button>
+        ))}
+      </div>
+      <div style={appStyles.grid}>
+        {PRODUCTS.map(p => (
+          <ProductCard key={p.id} product={p} onAddToCart={() => {}} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ProductDetailPage({ setPage }) {
+  const product = PRODUCTS[0];
+  const [selectedSize, setSelectedSize] = useState('6');
+  return (
+    <div style={appStyles.section}>
+      <button onClick={() => setPage('shop')}
+        style={{background:'none',border:'none',fontFamily:"'Nunito',sans-serif",fontWeight:800,fontSize:14,color:'#9A7B70',cursor:'pointer',marginBottom:24,padding:0}}>
+        ← Voltar para a loja
+      </button>
+      <div style={appStyles.detailWrap}>
+        <div style={appStyles.detailImg}>{product.emoji}</div>
+        <div style={appStyles.detailInfo}>
+          <span style={appStyles.detailBadge}>Nova Coleção 2025</span>
+          <div style={appStyles.detailName}>{product.name}</div>
+          <div style={appStyles.detailDesc}>
+            Camiseta leve com estampa exclusiva. Tecido 100% algodão penteado,<br/>
+            confortável para o dia a dia de aventuras dos pequenos.
+          </div>
+          <div style={appStyles.detailPriceRow}>
+            <span style={appStyles.detailPrice}>{product.price}</span>
+            {product.priceOld && <span style={appStyles.detailOld}>{product.priceOld}</span>}
+          </div>
+          <div style={appStyles.sizeLabel}>Escolha o tamanho</div>
+          <div style={appStyles.sizeRow}>
+            {product.sizes.map(s => (
+              <button key={s} onClick={() => setSelectedSize(s)}
+                style={selectedSize===s
+                  ? {...appStyles.sizeBtn, ...appStyles.sizeBtnActive}
+                  : appStyles.sizeBtn}>
+                {s}
+              </button>
+            ))}
+          </div>
+          <div>
+            <button style={appStyles.addBtn}>Adicionar ao carrinho</button>
+            <button style={appStyles.wishBtn}>♡</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AtacadoPage() {
+  const infoItems = [
+    { icon:'📦', title:'Pedido mínimo', desc:'A partir de 12 peças por modelo. Sem restrição de grade.' },
+    { icon:'💰', title:'Preços especiais', desc:'Tabela exclusiva para revendedores. Até 40% de desconto.' },
+    { icon:'🚚', title:'Entrega nacional', desc:'Enviamos para todo o Brasil. Frete grátis acima de R$500.' },
+    { icon:'🤝', title:'Suporte dedicado', desc:'Atendimento via WhatsApp para revendedores cadastrados.' },
+  ];
+  return (
+    <div>
+      <div style={appStyles.atacadoHero}>
+        <div style={{position:'absolute',width:400,height:400,borderRadius:'50%',background:'#FF6B4A',opacity:.08,filter:'blur(80px)',top:-100,right:-100}} />
+        <div style={{position:'absolute',width:300,height:300,borderRadius:'50%',background:'#FFD340',opacity:.10,filter:'blur(80px)',bottom:-80,left:200}} />
+        <div style={{position:'relative',zIndex:1}}>
+          <div style={{...appStyles.detailBadge, background:'#FFD340', color:'#3D2B1F', marginBottom:20}}>Atacado</div>
+          <div style={appStyles.atacadoTitle}>Revenda com a gente</div>
+          <div style={appStyles.atacadoSub}>
+            Seja um revendedor autorizado Playbekids. Trabalhe com moda infantil masculina de qualidade e tenha acesso à tabela exclusiva de atacado.
+          </div>
+          <button style={appStyles.atacadoBtn}>Quero ser revendedor</button>
+        </div>
+      </div>
+      <div style={{...appStyles.section}}>
+        <div style={appStyles.sectionTitle}>Por que revender Playbekids?</div>
+        <div style={appStyles.infoCards}>
+          {infoItems.map(item => (
+            <div key={item.title} style={appStyles.infoCard}>
+              <div style={appStyles.infoIcon}>{item.icon}</div>
+              <div style={appStyles.infoTitle}>{item.title}</div>
+              <div style={appStyles.infoDesc}>{item.desc}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── APP ──────────────────────────────────────────────────
+function App() {
+  const [page, setPage] = useState(() => localStorage.getItem('pbk_page') || 'home');
+  const handleSetPage = (p) => { setPage(p); localStorage.setItem('pbk_page', p); window.scrollTo({top:0}); };
+
+  return (
+    <div style={appStyles.page}>
+      <Header activePage={page} setPage={handleSetPage} />
+      {page === 'home'    && <HomePage setPage={handleSetPage} />}
+      {page === 'shop'    && <ShopPage setPage={handleSetPage} />}
+      {page === 'detail'  && <ProductDetailPage setPage={handleSetPage} />}
+      {page === 'atacado' && <AtacadoPage />}
+      {page === 'sobre'   && (
+        <div style={{...appStyles.section, textAlign:'center', maxWidth:600, margin:'0 auto'}}>
+          <div style={appStyles.sectionTitle}>Sobre a Playbekids</div>
+          <p style={{fontFamily:"'Nunito',sans-serif",fontWeight:600,fontSize:16,color:'#6B4F42',lineHeight:1.7,marginTop:16}}>
+            A Playbekids é uma loja de moda infantil masculina, com foco em qualidade, estilo e conforto para os pequenos. Atendemos tanto no varejo quanto no atacado, para todo o Brasil.
+          </p>
+          <div style={{marginTop:32}}>
+            <a href="https://instagram.com/playbekids2" target="_blank"
+              style={{background:'#FF6B4A',color:'#fff',borderRadius:100,padding:'12px 28px',fontFamily:"'Nunito',sans-serif",fontWeight:900,fontSize:16,display:'inline-block'}}>
+              Seguir no Instagram
+            </a>
+          </div>
+        </div>
+      )}
+      <Footer />
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

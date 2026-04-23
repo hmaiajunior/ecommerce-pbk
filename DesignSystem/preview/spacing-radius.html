@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Nunito', sans-serif; background: #fff9f0; padding: 20px; }
+  .section { margin-bottom: 16px; }
+  .label { font-size: 10px; font-weight: 800; color: #9A7B70; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .row { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+  .space-box { display: flex; align-items: center; gap: 6px; }
+  .space-rect { background: #FF6B4A; opacity: .7; height: 12px; }
+  .space-label { font-size: 10px; font-weight: 700; color: #6B4F42; }
+  .radius-box { background: #f5ede8; border: 2px solid #FF6B4A; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; }
+  .radius-label { font-size: 9px; font-weight: 800; color: #6B4F42; text-align: center; }
+</style>
+</head>
+<body>
+  <div class="section">
+    <div class="label">Spacing Scale</div>
+    <div class="row">
+      <div class="space-box"><div class="space-rect" style="width:4px"></div><span class="space-label">xs 4</span></div>
+      <div class="space-box"><div class="space-rect" style="width:8px"></div><span class="space-label">sm 8</span></div>
+      <div class="space-box"><div class="space-rect" style="width:16px"></div><span class="space-label">md 16</span></div>
+      <div class="space-box"><div class="space-rect" style="width:24px"></div><span class="space-label">lg 24</span></div>
+      <div class="space-box"><div class="space-rect" style="width:40px"></div><span class="space-label">xl 40</span></div>
+      <div class="space-box"><div class="space-rect" style="width:64px"></div><span class="space-label">2xl 64</span></div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="label">Border Radius</div>
+    <div class="row">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+        <div class="radius-box" style="border-radius:8px"></div><span class="radius-label">sm 8px</span></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+        <div class="radius-box" style="border-radius:12px"></div><span class="radius-label">md 12px</span></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+        <div class="radius-box" style="border-radius:16px"></div><span class="radius-label">lg 16px</span></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+        <div class="radius-box" style="border-radius:20px"></div><span class="radius-label">card 20px</span></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+        <div class="radius-box" style="border-radius:100px"></div><span class="radius-label">pill 100px</span></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+        <div class="radius-box" style="border-radius:50%"></div><span class="radius-label">circle 50%</span></div>
+    </div>
+  </div>
+</body></html>

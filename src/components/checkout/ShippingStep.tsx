@@ -1,0 +1,116 @@
+"use client"
+
+import { useEffect, useState } from "react"
+import { Truck, ArrowLeft } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { cn, formatPrice } from "@/lib/utils"
+import { useCartStore } from "@/store/cart"
+import type { ShippingQuote } from "@/lib/melhorenvio"
+
+type Address = { zipCode: string }
+
+type Props = {
+  address: Address
+  onNext: (option: ShippingQuote) => void
+  onBack: () => void
+}
+
+export function ShippingStep({ address, onNext, onBack }: Props) {
+  const items = useCartStore((s) => s.items)
+  const [options, setOptions] = useState<ShippingQuote[]>([])
+  const [selected, setSelected] = useState<ShippingQuote | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
+
+  useEffect(() => {
+    setLoading(true)
+    setError("")
+    fetch("/api/frete/calcular", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        zipCode: address.zipCode,
+        items: items.map((i) => ({ productId: i.productId, size: i.size, quantity: i.quantity })),
+      }),
+    })
+      .then((r) => r.json())
+      .then((json) => {
+        if (json.error) { setError(json.error); return }
+        setOptions(json.data ?? [])
+        if (json.data?.length > 0) setSelected(json.data[0])
+      })
+      .catch(() => setError("Erro ao calcular frete."))
+      .finally(() => setLoading(false))
+  }, [address.zipCode, items])
+
+  return (
+    <div className="space-y-5">
+      <div className="flex items-center gap-3">
+        <button onClick={onBack} className="text-brown-muted hover:text-primary transition-colors">
+          <ArrowLeft size={18} />
+        </button>
+        <h2 className="font-black text-xl text-brown-dark">Opções de frete</h2>
+      </div>
+
+      <p className="text-sm font-semibold text-brown-muted">
+        Entrega para o CEP <strong className="text-brown-dark">{address.zipCode}</strong>
+      </p>
+
+      {loading && (
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-16 rounded-card bg-bg-nude animate-pulse" />
+          ))}
+        </div>
+      )}
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-card p-4">
+          <p className="text-sm font-bold text-red-500">{error}</p>
+          <p className="text-xs font-semibold text-red-400 mt-1">
+            Verifique o CEP e tente novamente.
+          </p>
+        </div>
+      )}
+
+      {!loading && !error && (
+        <div className="space-y-3">
+          {options.map((opt) => (
+            <button
+              key={opt.id}
+              onClick={() => setSelected(opt)}
+              className={cn(
+                "w-full flex items-center justify-between p-4 rounded-card border-2 transition-all",
+                selected?.id === opt.id
+                  ? "border-primary bg-primary/5"
+                  : "border-bg-nude bg-white hover:border-brown-muted"
+              )}
+            >
+              <div className="flex items-center gap-3">
+                <Truck size={18} className={selected?.id === opt.id ? "text-primary" : "text-brown-muted"} />
+                <div className="text-left">
+                  <p className="font-extrabold text-sm text-brown-dark">{opt.service}</p>
+                  <p className="font-semibold text-xs text-brown-muted">
+                    {opt.company} · {opt.deliveryDays} dia{opt.deliveryDays !== 1 ? "s" : ""} úteis
+                  </p>
+                </div>
+              </div>
+              <span className="font-black text-[17px] text-primary">
+                {opt.price === 0 ? "Grátis" : formatPrice(opt.price)}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      <Button
+        size="lg"
+        className="w-full"
+        disabled={!selected || loading}
+        onClick={() => selected && onNext(selected)}
+      >
+        Continuar para o pagamento →
+      </Button>
+    </div>
+  )
+}
