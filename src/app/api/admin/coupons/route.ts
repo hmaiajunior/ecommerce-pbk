@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
     where: {
       ...(active !== null && { active: active === "true" }),
     },
-    orderBy: { createdAt: "desc" },
+    orderBy: { code: "asc" },
   })
 
   return NextResponse.json({ data: coupons })
