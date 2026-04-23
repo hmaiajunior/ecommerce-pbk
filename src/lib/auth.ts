@@ -3,6 +3,7 @@ import Credentials from "next-auth/providers/credentials"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import bcrypt from "bcryptjs"
 import { prisma } from "@/lib/prisma"
+import type { Role } from "@prisma/client"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -54,7 +55,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     session({ session, token }) {
       session.user.id = token.id as string
-      session.user.role = token.role
+      session.user.role = token.role as Role
       session.user.wholesaleApproved = token.wholesaleApproved as boolean
       return session
     },
