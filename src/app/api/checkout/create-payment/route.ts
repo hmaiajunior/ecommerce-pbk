@@ -175,7 +175,7 @@ export async function POST(req: NextRequest) {
       responseData = {
         paymentId: result.id,
         boletoUrl: result.transaction_details?.external_resource_url,
-        barcode: result.barcode?.content,
+        barcode: (result as any).barcode?.content,
         expiresAt: result.date_of_expiration,
       }
     }
