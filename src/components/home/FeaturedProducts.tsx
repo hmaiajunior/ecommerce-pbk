@@ -1,14 +1,20 @@
 import Link from "next/link"
 import { ProductCard } from "@/components/shop/ProductCard"
+import { prisma } from "@/lib/prisma"
 
 async function getFeaturedProducts() {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
-  const res = await fetch(`${baseUrl}/api/products?sort=featured&limit=8`, {
-    next: { revalidate: 300 },
-  })
-  if (!res.ok) return []
-  const json = await res.json()
-  return json.data ?? []
+  try {
+    return await prisma.product.findMany({
+      where: { featured: true, active: true },
+      take: 8,
+      include: {
+        images: { orderBy: { position: "asc" } },
+        sizes: { where: { stock: { gt: 0 } } },
+      },
+    })
+  } catch {
+    return []
+  }
 }
 
 export async function FeaturedProducts() {
