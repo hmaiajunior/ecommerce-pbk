@@ -23,6 +23,7 @@ export function Header() {
   const itemCount = useCartStore((s) => s.itemCount())
   const openCart = useUIStore((s) => s.openCart)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
 
   return (
     <header className="sticky top-0 z-50 border-b border-bg-nude bg-bg-cream/90 backdrop-blur-md">
@@ -74,11 +75,16 @@ export function Header() {
           </Link>
 
           {session ? (
-            <div className="relative group hidden md:block">
+            <div
+              className="relative hidden md:block"
+              onMouseEnter={() => setMenuOpen(true)}
+              onMouseLeave={() => setMenuOpen(false)}
+            >
               <button className="w-[38px] h-[38px] rounded-full bg-bg-blush flex items-center justify-center text-brown-mid hover:bg-bg-nude transition-colors">
                 <User size={16} />
               </button>
-              <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-card shadow-[0_4px_24px_rgba(61,43,31,0.12)] border border-bg-nude hidden group-hover:block z-50">
+              {menuOpen && (
+              <div className="absolute right-0 top-full w-48 bg-white rounded-card shadow-[0_4px_24px_rgba(61,43,31,0.12)] border border-bg-nude z-50">
                 <Link
                   href="/minha-conta"
                   className="block px-4 py-3 text-sm font-bold text-brown-mid hover:text-primary hover:bg-bg-blush rounded-t-card transition-colors"
@@ -106,6 +112,7 @@ export function Header() {
                   <LogOut size={14} /> Sair
                 </button>
               </div>
+              )}
             </div>
           ) : (
             <Link href="/login" className="hidden md:block">
