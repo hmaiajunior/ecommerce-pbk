@@ -45,9 +45,10 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ data: quotes })
-  } catch {
+  } catch (err) {
+    console.error("[frete/calcular]", err)
     return NextResponse.json(
-      { error: "Não foi possível calcular o frete. Tente novamente." },
+      { error: "Não foi possível calcular o frete. Tente novamente.", detail: String(err) },
       { status: 502 }
     )
   }
