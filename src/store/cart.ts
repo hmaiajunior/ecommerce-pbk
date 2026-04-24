@@ -79,8 +79,7 @@ export const useCartStore = create<CartStore>()(
 
       subtotal: () =>
         get().items.reduce((sum, item) => {
-          const price = item.wholesalePrice ?? item.retailPrice
-          return sum + price * item.quantity
+          return sum + item.retailPrice * item.quantity
         }, 0),
 
       itemCount: () =>

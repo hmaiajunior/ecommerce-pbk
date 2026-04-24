@@ -4,10 +4,15 @@ import Image from "next/image"
 import { Minus, Plus, Trash2 } from "lucide-react"
 import { useCartStore, type CartItem as CartItemType } from "@/store/cart"
 import { formatPrice } from "@/lib/utils"
+import { useSession } from "next-auth/react"
 
 export function CartItem({ item }: { item: CartItemType }) {
   const { updateQuantity, removeItem } = useCartStore()
-  const price = item.wholesalePrice ?? item.retailPrice
+  const { data: session, status } = useSession()
+  const isWholesale = status === "authenticated"
+    && session?.user.role === "WHOLESALE"
+    && session.user.wholesaleApproved === true
+  const price = isWholesale && item.wholesalePrice ? item.wholesalePrice : item.retailPrice
 
   return (
     <div className="flex gap-3 py-3 border-b border-bg-nude last:border-0">
