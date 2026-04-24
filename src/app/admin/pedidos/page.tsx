@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { ChevronDown } from "lucide-react"
+import { ChevronDown, CheckCircle2 } from "lucide-react"
 import { OrderStatusBadge, PaymentStatusBadge } from "@/components/account/OrderStatusBadge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn, formatPrice } from "@/lib/utils"
@@ -45,6 +45,31 @@ export default function AdminPedidosPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-orders"] }),
   })
 
+  const markPaidMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/admin/orders/${id}/mark-paid`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      })
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}))
+        throw new Error(json.error ?? "Falha ao dar baixa no pedido.")
+      }
+      return res.json()
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-orders"] }),
+    onError: (err: Error) => alert(err.message),
+  })
+
+  function handleMarkPaid(order: Order) {
+    const shortId = order.id.slice(-8).toUpperCase()
+    const ok = window.confirm(
+      `Confirmar baixa manual do pedido #${shortId}?\n\nEssa ação marca o pagamento como APROVADO, move o pedido para PROCESSANDO e dispara o e-mail de confirmação ao cliente.\n\nUse apenas quando o webhook do gateway não chegou, mas o pagamento foi confirmado por outro meio.`
+    )
+    if (ok) markPaidMutation.mutate(order.id)
+  }
+
   const orders: Order[] = data?.data ?? []
   const meta = data?.meta ?? { total: 0, pages: 0 }
 
@@ -73,7 +98,7 @@ export default function AdminPedidosPage() {
         <div className="bg-white rounded-card shadow-[var(--shadow-card)] overflow-hidden">
           <table className="w-full text-sm">
             <thead className="border-b border-bg-nude bg-bg-blush">
-              <tr>{["Pedido","Cliente","Itens","Total","Pgto.","Status","Alterar status"].map(h => (
+              <tr>{["Pedido","Cliente","Itens","Total","Pgto.","Status","Alterar status","Ações"].map(h => (
                 <th key={h} className="text-left py-3 px-3 text-xs font-black uppercase tracking-wider text-brown-muted">{h}</th>
               ))}</tr>
             </thead>
@@ -103,6 +128,19 @@ export default function AdminPedidosPage() {
                       </select>
                       <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-brown-muted pointer-events-none" />
                     </div>
+                  </td>
+                  <td className="py-3 px-3">
+                    {order.paymentStatus === "PENDING" && order.status !== "CANCELLED" && (
+                      <button
+                        onClick={() => handleMarkPaid(order)}
+                        disabled={markPaidMutation.isPending}
+                        title="Marcar pagamento como aprovado manualmente"
+                        className="inline-flex items-center gap-1.5 bg-green-50 hover:bg-green-100 border border-green-200 text-green-700 rounded-lg px-3 py-1.5 font-bold text-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <CheckCircle2 size={13} />
+                        Dar baixa
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}
