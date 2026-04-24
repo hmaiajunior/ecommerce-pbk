@@ -20,6 +20,7 @@ type Address = {
 export default function CheckoutPage() {
   const router = useRouter()
   const items = useCartStore((s) => s.items)
+  const coupon = useCartStore((s) => s.coupon)
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const [address, setAddress] = useState<Address | null>(null)
   const [shipping, setShipping] = useState<ShippingQuote | null>(null)
@@ -68,6 +69,7 @@ export default function CheckoutPage() {
             <PaymentStep
               address={address}
               shipping={shipping}
+              coupon={coupon}
               onBack={() => setStep(2)}
             />
           )}
@@ -75,7 +77,7 @@ export default function CheckoutPage() {
 
         {/* Resumo */}
         <div>
-          <OrderSummary shippingCost={shipping?.price} />
+          <OrderSummary shippingCost={shipping?.price} discount={coupon?.discount} />
         </div>
       </div>
     </div>

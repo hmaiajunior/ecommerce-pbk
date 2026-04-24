@@ -16,10 +16,11 @@ type Address = {
 type Props = {
   address: Address
   shipping: ShippingQuote
+  coupon?: { code: string; discount: number } | null
   onBack: () => void
 }
 
-export function PaymentStep({ address, shipping, onBack }: Props) {
+export function PaymentStep({ address, shipping, coupon, onBack }: Props) {
   const { items, clearCart } = useCartStore()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
@@ -38,6 +39,7 @@ export function PaymentStep({ address, shipping, onBack }: Props) {
       addressId: address.id,
       shippingService: shipping.service,
       shippingCost: shipping.price,
+      couponCode: coupon?.code,
     })
 
     if ("error" in orderResult) {

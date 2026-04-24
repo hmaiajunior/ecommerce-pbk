@@ -16,10 +16,12 @@ export type CartItem = {
 
 type CartStore = {
   items: CartItem[]
+  coupon: { code: string; discount: number } | null
   addItem: (item: Omit<CartItem, "quantity"> & { quantity?: number }) => void
   removeItem: (productId: string, size: string) => void
   updateQuantity: (productId: string, size: string, quantity: number) => void
   clearCart: () => void
+  setCoupon: (coupon: { code: string; discount: number } | null) => void
   subtotal: () => number
   itemCount: () => number
 }
@@ -28,6 +30,9 @@ export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
       items: [],
+      coupon: null,
+
+      setCoupon: (coupon) => set({ coupon }),
 
       addItem: (newItem) => {
         const qty = newItem.quantity ?? 1
@@ -70,7 +75,7 @@ export const useCartStore = create<CartStore>()(
         }))
       },
 
-      clearCart: () => set({ items: [] }),
+      clearCart: () => set({ items: [], coupon: null }),
 
       subtotal: () =>
         get().items.reduce((sum, item) => {

@@ -10,14 +10,13 @@ import { useState } from "react"
 import { applyCoupon } from "@/actions/checkout"
 
 export default function CarrinhoPage() {
-  const { items, subtotal, clearCart } = useCartStore()
-  const [couponCode, setCouponCode] = useState("")
-  const [couponResult, setCouponResult] = useState<{ discount: number; code: string } | null>(null)
+  const { items, subtotal, clearCart, coupon, setCoupon } = useCartStore()
+  const [couponCode, setCouponCode] = useState(coupon?.code ?? "")
   const [couponError, setCouponError] = useState("")
   const [loadingCoupon, setLoadingCoupon] = useState(false)
 
   const sub = subtotal()
-  const discount = couponResult?.discount ?? 0
+  const discount = coupon?.discount ?? 0
   const total = sub - discount
 
   async function handleCoupon() {
@@ -29,7 +28,7 @@ export default function CarrinhoPage() {
     if ("error" in result) {
       setCouponError(result.error)
     } else {
-      setCouponResult({ discount: result.discount, code: couponCode.toUpperCase() })
+      setCoupon({ discount: result.discount, code: couponCode.toUpperCase() })
     }
   }
 
@@ -75,14 +74,14 @@ export default function CarrinhoPage() {
           <p className="font-black text-[17px] text-brown-dark">Resumo do pedido</p>
 
           {/* Cupom */}
-          {couponResult ? (
+          {coupon ? (
             <div className="flex items-center justify-between bg-primary/10 rounded-lg px-3 py-2">
               <div>
-                <p className="font-extrabold text-sm text-primary">{couponResult.code}</p>
-                <p className="text-xs font-bold text-brown-muted">− {formatPrice(couponResult.discount)}</p>
+                <p className="font-extrabold text-sm text-primary">{coupon.code}</p>
+                <p className="text-xs font-bold text-brown-muted">− {formatPrice(coupon.discount)}</p>
               </div>
               <button
-                onClick={() => setCouponResult(null)}
+                onClick={() => setCoupon(null)}
                 className="text-xs font-bold text-brown-muted hover:text-red-400"
               >
                 Remover
