@@ -15,10 +15,25 @@ type Props = {
   onBack: () => void
 }
 
+const ALLOW_SKIP_SHIPPING =
+  process.env.NEXT_PUBLIC_ALLOW_SKIP_SHIPPING === "true"
+
+const TEST_SHIPPING_OPTION: ShippingQuote = {
+  id: 0,
+  service: "Frete teste (R$ 0,00)",
+  company: "Modo teste — ignora cálculo real",
+  price: 0,
+  deliveryDays: 0,
+}
+
 export function ShippingStep({ address, onNext, onBack }: Props) {
   const items = useCartStore((s) => s.items)
-  const [options, setOptions] = useState<ShippingQuote[]>([])
-  const [selected, setSelected] = useState<ShippingQuote | null>(null)
+  const [options, setOptions] = useState<ShippingQuote[]>(
+    ALLOW_SKIP_SHIPPING ? [TEST_SHIPPING_OPTION] : []
+  )
+  const [selected, setSelected] = useState<ShippingQuote | null>(
+    ALLOW_SKIP_SHIPPING ? TEST_SHIPPING_OPTION : null
+  )
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
 
@@ -35,11 +50,20 @@ export function ShippingStep({ address, onNext, onBack }: Props) {
     })
       .then((r) => r.json())
       .then((json) => {
-        if (json.error) { setError(json.error); return }
-        setOptions(json.data ?? [])
-        if (json.data?.length > 0) setSelected(json.data[0])
+        if (json.error && !ALLOW_SKIP_SHIPPING) {
+          setError(json.error)
+          return
+        }
+        const apiOptions: ShippingQuote[] = json.data ?? []
+        const merged = ALLOW_SKIP_SHIPPING
+          ? [TEST_SHIPPING_OPTION, ...apiOptions]
+          : apiOptions
+        setOptions(merged)
+        if (merged.length > 0) setSelected(merged[0])
       })
-      .catch(() => setError("Erro ao calcular frete."))
+      .catch(() => {
+        if (!ALLOW_SKIP_SHIPPING) setError("Erro ao calcular frete.")
+      })
       .finally(() => setLoading(false))
   }, [address.zipCode, items])
 
