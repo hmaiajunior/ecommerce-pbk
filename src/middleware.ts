@@ -2,8 +2,13 @@ import { auth } from "@/lib/auth"
 import { NextResponse } from "next/server"
 
 export default auth((req) => {
-  const { pathname, origin } = req.nextUrl
+  const { pathname } = req.nextUrl
   const session = req.auth
+
+  // Usa o host real da requisição, ignorando AUTH_URL
+  const proto = req.headers.get("x-forwarded-proto") ?? "https"
+  const host = req.headers.get("x-forwarded-host") ?? req.headers.get("host") ?? req.nextUrl.host
+  const origin = `${proto}://${host}`
 
   if (pathname.startsWith("/admin")) {
     if (!session || session.user.role !== "ADMIN") {
