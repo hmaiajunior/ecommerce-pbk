@@ -1,16 +1,29 @@
 "use client"
 
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { X, ShoppingBag } from "lucide-react"
 import { useCartStore } from "@/store/cart"
 import { useUIStore } from "@/store/ui"
 import { CartItem } from "./CartItem"
 import { Button } from "@/components/ui/button"
 import { formatPrice } from "@/lib/utils"
+import { useSession } from "next-auth/react"
 
 export function CartDrawer() {
   const { cartOpen, closeCart } = useUIStore()
-  const { items, subtotal, clearCart } = useCartStore()
+  const { items, subtotal } = useCartStore()
+  const { data: session, status } = useSession()
+  const router = useRouter()
+
+  function handleCheckout() {
+    closeCart()
+    if (status === "authenticated") {
+      router.push("/checkout")
+    } else {
+      router.push("/login?callbackUrl=/checkout")
+    }
+  }
 
   return (
     <>
@@ -86,10 +99,10 @@ export function CartDrawer() {
               variant="primary"
               size="lg"
               className="w-full"
-              onClick={closeCart}
-              asChild
+              onClick={handleCheckout}
+              disabled={status === "loading"}
             >
-              <Link href="/checkout">Finalizar compra</Link>
+              Finalizar compra
             </Button>
             <Button
               variant="ghost"

@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { ShoppingBag, ArrowLeft } from "lucide-react"
 import { useCartStore } from "@/store/cart"
 import { CartItem } from "@/components/cart/CartItem"
@@ -8,9 +9,12 @@ import { Button } from "@/components/ui/button"
 import { formatPrice } from "@/lib/utils"
 import { useState } from "react"
 import { applyCoupon } from "@/actions/checkout"
+import { useSession } from "next-auth/react"
 
 export default function CarrinhoPage() {
   const { items, subtotal, clearCart, coupon, setCoupon } = useCartStore()
+  const { status } = useSession()
+  const router = useRouter()
   const [couponCode, setCouponCode] = useState(coupon?.code ?? "")
   const [couponError, setCouponError] = useState("")
   const [loadingCoupon, setLoadingCoupon] = useState(false)
@@ -18,6 +22,14 @@ export default function CarrinhoPage() {
   const sub = subtotal()
   const discount = coupon?.discount ?? 0
   const total = sub - discount
+
+  function handleCheckout() {
+    if (status === "authenticated") {
+      router.push("/checkout")
+    } else {
+      router.push("/login?callbackUrl=/checkout")
+    }
+  }
 
   async function handleCoupon() {
     if (!couponCode.trim()) return
@@ -129,10 +141,8 @@ export default function CarrinhoPage() {
             </div>
           </div>
 
-          <Button size="lg" className="w-full" asChild>
-            <Link href="/checkout">
-              <ShoppingBag size={16} /> Finalizar compra
-            </Link>
+          <Button size="lg" className="w-full" onClick={handleCheckout} disabled={status === "loading"}>
+            <ShoppingBag size={16} /> Finalizar compra
           </Button>
 
           <Link href="/produtos" className="block text-center text-sm font-bold text-brown-muted hover:text-primary transition-colors">
