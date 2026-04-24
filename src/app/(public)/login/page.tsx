@@ -39,7 +39,14 @@ function LoginForm() {
       return
     }
 
-    router.push(callbackUrl)
+    // Busca a sessão para saber o role e redirecionar corretamente
+    const { getSession } = await import("next-auth/react")
+    const session = await getSession()
+    const destination = callbackUrl !== "/" ? callbackUrl
+      : session?.user?.role === "ADMIN" ? "/admin"
+      : "/"
+
+    router.push(destination)
     router.refresh()
   }
 
