@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "")
   const webhookSecret = process.env.INFINITEPAY_WEBHOOK_SECRET
 
   if (!appUrl || !webhookSecret) {
