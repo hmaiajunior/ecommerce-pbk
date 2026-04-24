@@ -2,20 +2,19 @@ import { auth } from "@/lib/auth"
 import { NextResponse } from "next/server"
 
 export default auth((req) => {
-  const { pathname } = req.nextUrl
+  const { pathname, origin } = req.nextUrl
   const session = req.auth
-  const baseUrl = process.env.AUTH_URL ?? req.nextUrl.origin
 
   if (pathname.startsWith("/admin")) {
     if (!session || session.user.role !== "ADMIN") {
-      return NextResponse.redirect(`${baseUrl}/login`)
+      return NextResponse.redirect(`${origin}/login`)
     }
   }
 
   if (pathname.startsWith("/minha-conta") || pathname.startsWith("/checkout")) {
     if (!session) {
       return NextResponse.redirect(
-        `${baseUrl}/login?callbackUrl=${encodeURIComponent(pathname)}`
+        `${origin}/login?callbackUrl=${encodeURIComponent(pathname)}`
       )
     }
   }
