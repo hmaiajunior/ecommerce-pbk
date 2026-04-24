@@ -2,35 +2,13 @@ import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { mpPayment, mapMpStatus } from "@/lib/mercadopago"
-import { sendOrderConfirmationEmail } from "@/lib/email"
+import { createCheckoutLink } from "@/lib/infinitepay"
 
-// ─── Schemas ──────────────────────────────────────────────────────────────────
+// ─── Schema ───────────────────────────────────────────────────────────────────
 
-const pixSchema = z.object({
-  method: z.literal("pix"),
+const bodySchema = z.object({
   orderId: z.string(),
 })
-
-const creditCardSchema = z.object({
-  method: z.literal("credit_card"),
-  orderId: z.string(),
-  cardToken: z.string(),
-  installments: z.number().int().min(1).max(12),
-  paymentMethodId: z.string(), // "visa", "master", etc.
-})
-
-const boletoSchema = z.object({
-  method: z.literal("boleto"),
-  orderId: z.string(),
-  payerCpf: z.string().regex(/^\d{11}$/, "CPF deve conter 11 dígitos"),
-})
-
-const bodySchema = z.discriminatedUnion("method", [
-  pixSchema,
-  creditCardSchema,
-  boletoSchema,
-])
 
 // ─── Handler ──────────────────────────────────────────────────────────────────
 
@@ -41,10 +19,6 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json().catch(() => null)
-  if (!body) {
-    return NextResponse.json({ error: "Body inválido." }, { status: 400 })
-  }
-
   const parsed = bodySchema.safeParse(body)
   if (!parsed.success) {
     return NextResponse.json(
@@ -53,14 +27,12 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  const input = parsed.data
-
-  // Busca o pedido e valida que pertence ao usuário logado
   const order = await prisma.order.findFirst({
-    where: { id: input.orderId, userId: session.user.id },
+    where: { id: parsed.data.orderId, userId: session.user.id },
     include: {
       address: true,
       user: { select: { name: true, email: true } },
+      items: { include: { product: { select: { name: true } } } },
     },
   })
 
@@ -75,116 +47,66 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  const shortId = order.id.slice(-8).toUpperCase()
-  const description = `Pedido Playbekids #${shortId}`
-  const [firstName, ...rest] = (order.user.name ?? "Cliente").split(" ")
-  const lastName = rest.join(" ") || firstName
-  const email = order.user.email ?? ""
-  const totalAmount = parseFloat(String(order.total))
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL
+  const webhookSecret = process.env.INFINITEPAY_WEBHOOK_SECRET
+
+  if (!appUrl || !webhookSecret) {
+    console.error("[create-payment] variáveis de ambiente faltando")
+    return NextResponse.json(
+      { error: "Configuração de pagamento indisponível." },
+      { status: 500 }
+    )
+  }
+
+  // InfinitePay trabalha com preços em centavos (integer)
+  const items = order.items.map((item) => ({
+    quantity: item.quantity,
+    price: Math.round(Number(item.price) * 100),
+    description: item.product.name,
+  }))
+
+  // O frete é adicionado como um item extra para compor o total exato
+  const shippingCents = Math.round(Number(order.shippingCost) * 100)
+  if (shippingCents > 0) {
+    items.push({
+      quantity: 1,
+      price: shippingCents,
+      description: "Frete",
+    })
+  }
+
+  const redirectUrl = `${appUrl}/minha-conta/pedidos/${order.id}`
+  const webhookUrl = `${appUrl}/api/webhook/infinitepay?secret=${webhookSecret}`
 
   try {
-    let responseData: Record<string, unknown>
+    const checkoutUrl = await createCheckoutLink({
+      items,
+      orderNsu: order.id,
+      redirectUrl,
+      webhookUrl,
+      customer: {
+        name: order.user.name ?? "Cliente",
+        email: order.user.email ?? "",
+      },
+      address: {
+        cep: order.address.zipCode.replace(/\D/g, ""),
+        street: order.address.street,
+        neighborhood: order.address.neighborhood,
+        number: order.address.number,
+        ...(order.address.complement && { complement: order.address.complement }),
+      },
+    })
 
-    if (input.method === "pix") {
-      const result = await mpPayment.create({
-        body: {
-          transaction_amount: totalAmount,
-          description,
-          payment_method_id: "pix",
-          payer: { email, first_name: firstName, last_name: lastName },
-        },
-        requestOptions: { idempotencyKey: order.id },
-      })
+    await prisma.order.update({
+      where: { id: order.id },
+      data: { paymentMethod: "infinitepay_checkout" },
+    })
 
-      await prisma.order.update({
-        where: { id: order.id },
-        data: { paymentId: String(result.id), paymentMethod: "pix" },
-      })
-
-      responseData = {
-        paymentId: result.id,
-        qrCode: result.point_of_interaction?.transaction_data?.qr_code,
-        qrCodeBase64: result.point_of_interaction?.transaction_data?.qr_code_base64,
-        expiresAt: result.date_of_expiration,
-      }
-    } else if (input.method === "credit_card") {
-      const result = await mpPayment.create({
-        body: {
-          transaction_amount: totalAmount,
-          token: input.cardToken,
-          description,
-          installments: input.installments,
-          payment_method_id: input.paymentMethodId,
-          payer: { email },
-        },
-        requestOptions: { idempotencyKey: order.id },
-      })
-
-      const { orderStatus, paymentStatus } = mapMpStatus(result.status ?? undefined)
-
-      await prisma.order.update({
-        where: { id: order.id },
-        data: {
-          paymentId: String(result.id),
-          paymentMethod: "credit_card",
-          status: orderStatus,
-          paymentStatus,
-        },
-      })
-
-      // Pagamento de cartão pode ser aprovado imediatamente
-      if (paymentStatus === "APPROVED") {
-        await sendOrderConfirmationEmail(email, order.user.name ?? "", order.id)
-      }
-
-      responseData = {
-        paymentId: result.id,
-        status: result.status,
-        statusDetail: result.status_detail,
-      }
-    } else {
-      // boleto
-      const result = await mpPayment.create({
-        body: {
-          transaction_amount: totalAmount,
-          description,
-          payment_method_id: "bolbradesco",
-          payer: {
-            email,
-            first_name: firstName,
-            last_name: lastName,
-            identification: { type: "CPF", number: input.payerCpf },
-            address: {
-              zip_code: order.address.zipCode.replace(/\D/g, ""),
-              street_name: order.address.street,
-              street_number: order.address.number,
-              neighborhood: order.address.neighborhood,
-              city: order.address.city,
-              federal_unit: order.address.state,
-            },
-          },
-        },
-        requestOptions: { idempotencyKey: order.id },
-      })
-
-      await prisma.order.update({
-        where: { id: order.id },
-        data: { paymentId: String(result.id), paymentMethod: "boleto" },
-      })
-
-      responseData = {
-        paymentId: result.id,
-        boletoUrl: result.transaction_details?.external_resource_url,
-        barcode: (result as any).barcode?.content,
-        expiresAt: result.date_of_expiration,
-      }
-    }
-
-    return NextResponse.json({ data: responseData }, { status: 201 })
+    return NextResponse.json({ data: { checkoutUrl } }, { status: 201 })
   } catch (err) {
     console.error("[create-payment]", err)
     return NextResponse.json(
-      { error: "Erro ao processar pagamento. Tente novamente." },
+      { error: "Erro ao iniciar pagamento. Tente novamente." },
       { status: 502 }
     )
   }
