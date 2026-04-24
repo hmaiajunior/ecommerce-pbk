@@ -33,7 +33,7 @@ export function AccountNav() {
         </Link>
       ))}
       <button
-        onClick={() => signOut({ callbackUrl: "/" })}
+        onClick={() => signOut({ callbackUrl: window.location.origin })}
         className="flex items-center gap-3 px-4 py-3 rounded-lg font-bold text-sm text-brown-muted hover:bg-bg-blush hover:text-primary transition-colors"
       >
         <LogOut size={16} className="shrink-0" />

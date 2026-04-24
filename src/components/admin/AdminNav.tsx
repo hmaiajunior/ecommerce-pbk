@@ -55,7 +55,7 @@ export function AdminNav() {
       {/* Logout */}
       <div className="border-t border-white/10 pt-4 mt-4">
         <button
-          onClick={() => signOut({ callbackUrl: "/" })}
+          onClick={() => signOut({ callbackUrl: window.location.origin })}
           className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg font-bold text-sm text-brown-muted hover:bg-white/10 hover:text-white transition-colors"
         >
           <LogOut size={16} /> Sair

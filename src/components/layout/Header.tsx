@@ -100,7 +100,7 @@ export function Header() {
                   </Link>
                 )}
                 <button
-                  onClick={() => signOut({ callbackUrl: "/" })}
+                  onClick={() => signOut({ callbackUrl: window.location.origin })}
                   className="w-full text-left px-4 py-3 text-sm font-bold text-brown-muted hover:text-primary hover:bg-bg-blush rounded-b-card transition-colors flex items-center gap-2"
                 >
                   <LogOut size={14} /> Sair
@@ -161,7 +161,7 @@ export function Header() {
           {session ? (
             <>
               <Link href="/minha-conta" onClick={() => setMobileOpen(false)} className="px-4 py-3 rounded-lg font-bold text-brown-mid hover:bg-bg-blush">Minha conta</Link>
-              <button onClick={() => signOut({ callbackUrl: "/" })} className="text-left px-4 py-3 rounded-lg font-bold text-brown-muted hover:bg-bg-blush flex items-center gap-2"><LogOut size={14} /> Sair</button>
+              <button onClick={() => signOut({ callbackUrl: window.location.origin })} className="text-left px-4 py-3 rounded-lg font-bold text-brown-muted hover:bg-bg-blush flex items-center gap-2"><LogOut size={14} /> Sair</button>
             </>
           ) : (
             <Link href="/login" onClick={() => setMobileOpen(false)}>
