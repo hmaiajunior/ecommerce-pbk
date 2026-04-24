@@ -22,25 +22,31 @@ function isValidSecret(received: string | null): boolean {
 // ─── Handler ──────────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
+  console.log("[webhook/infinitepay] recebido")
+
   const secret = req.nextUrl.searchParams.get("secret")
   if (!isValidSecret(secret)) {
+    console.warn("[webhook/infinitepay] segredo inválido ou ausente")
     return NextResponse.json({ error: "Não autorizado." }, { status: 401 })
   }
 
   const payload = await req.json().catch(() => null)
   if (!payload) {
+    console.warn("[webhook/infinitepay] body inválido")
     return NextResponse.json({ error: "Body inválido." }, { status: 400 })
   }
+
+  console.log("[webhook/infinitepay] payload:", JSON.stringify(payload))
 
   const orderNsu = String(payload?.order_nsu ?? "")
   const transactionNsu = String(payload?.transaction_nsu ?? "")
   const captureMethod = typeof payload?.capture_method === "string"
     ? payload.capture_method
     : undefined
-  const paidAmount = Number(payload?.paid_amount ?? 0) // em centavos
-  const amount = Number(payload?.amount ?? 0)          // em centavos
+  const amount = Number(payload?.amount ?? 0) // em centavos
 
-  if (!orderNsu || !transactionNsu) {
+  if (!orderNsu) {
+    console.warn("[webhook/infinitepay] sem order_nsu — ignorado")
     return NextResponse.json({ received: true })
   }
 
@@ -51,16 +57,18 @@ export async function POST(req: NextRequest) {
     })
 
     if (!order) {
-      // order_nsu desconhecido - possivelmente de outra loja usando mesmo handle
+      console.warn(
+        `[webhook/infinitepay] pedido ${orderNsu} não encontrado — ignorado`
+      )
       return NextResponse.json({ received: true })
     }
 
     // Valida que o valor recebido é compatível com o pedido.
     // paid_amount pode ser maior que amount devido a juros do parcelamento.
     const expectedCents = Math.round(Number(order.total) * 100)
-    if (amount < expectedCents) {
+    if (amount > 0 && amount < expectedCents) {
       console.warn(
-        `[webhook/infinitepay] Valor divergente — esperado ${expectedCents}, recebido ${amount} (pedido ${order.id})`
+        `[webhook/infinitepay] valor divergente — esperado ${expectedCents}, recebido ${amount} (pedido ${order.id})`
       )
       return NextResponse.json({ received: true })
     }
@@ -74,9 +82,13 @@ export async function POST(req: NextRequest) {
         status: orderStatus,
         paymentStatus,
         paymentMethod,
-        paymentId: transactionNsu,
+        ...(transactionNsu && { paymentId: transactionNsu }),
       },
     })
+
+    console.log(
+      `[webhook/infinitepay] pedido ${order.id} atualizado para ${paymentStatus} (método ${paymentMethod})`
+    )
 
     if (
       paymentStatus === "APPROVED" &&
@@ -87,11 +99,12 @@ export async function POST(req: NextRequest) {
         order.user.name ?? "",
         order.id
       )
+      console.log(`[webhook/infinitepay] e-mail de confirmação enviado`)
     }
 
     return NextResponse.json({ received: true })
   } catch (err) {
-    console.error("[webhook/infinitepay]", err)
+    console.error("[webhook/infinitepay] erro:", err)
     // 200 evita reenvios indevidos da InfinitePay
     return NextResponse.json({ received: true })
   }
