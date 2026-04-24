@@ -32,10 +32,12 @@ export function ProductDetail({
   retailPrice, wholesalePrice, wholesaleMinQty,
   featured, images, sizes, category, ageRange,
 }: Props) {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
 
-  const isWholesale = session?.user.role === "WHOLESALE" && session.user.wholesaleApproved
+  const isWholesale = status === "authenticated"
+    && session?.user.role === "WHOLESALE"
+    && session.user.wholesaleApproved === true
   const displayPrice = isWholesale && wholesalePrice ? wholesalePrice : retailPrice
   const showWholesaleSavings = isWholesale && wholesalePrice && wholesalePrice < retailPrice
 

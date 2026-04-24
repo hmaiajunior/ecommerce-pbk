@@ -30,10 +30,13 @@ export function ProductCard({
   images,
   sizes,
 }: ProductCardProps) {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const addItem = useCartStore((s) => s.addItem)
 
-  const isWholesale = session?.user.role === "WHOLESALE" && session.user.wholesaleApproved
+  // Só mostra preço atacado quando a sessão estiver confirmada (não durante loading)
+  const isWholesale = status === "authenticated"
+    && session?.user.role === "WHOLESALE"
+    && session.user.wholesaleApproved === true
   const price = isWholesale && wholesalePrice ? Number(wholesalePrice) : Number(retailPrice)
   const showWholesale = isWholesale && wholesalePrice
 
