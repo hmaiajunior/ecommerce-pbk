@@ -27,15 +27,14 @@ export function IdentityStep() {
     startTransition(async () => {
       const exists = await checkEmailExists(trimmed)
       if (exists) {
-        // E-mail já cadastrado — faz login silencioso e segue para o checkout
         const result = await guestSignIn(trimmed)
         if (result.ok) {
+          router.push("/checkout")
           router.refresh()
         } else {
           setError("Ops! Algo deu errado. Por favor, tente novamente em instantes.")
         }
       } else {
-        // E-mail novo — pede o nome antes de criar a conta
         setStep("name")
       }
     })
@@ -51,6 +50,7 @@ export function IdentityStep() {
     startTransition(async () => {
       const result = await guestSignIn(email.trim().toLowerCase(), name.trim())
       if (result.ok) {
+        router.push("/checkout")
         router.refresh()
       } else {
         setError("Ops! Algo deu errado. Por favor, tente novamente em instantes.")
