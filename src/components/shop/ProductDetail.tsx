@@ -34,6 +34,7 @@ export function ProductDetail({
 }: Props) {
   const { data: session, status } = useSession()
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
+  const [quantity, setQuantity] = useState(1)
 
   const isWholesale = status === "authenticated"
     && session?.user.role === "WHOLESALE"
@@ -97,6 +98,28 @@ export function ProductDetail({
           onChange={setSelectedSize}
         />
 
+        {/* Quantidade */}
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.1em] text-brown-muted mb-2">
+            Quantidade
+          </p>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setQuantity(q => Math.max(1, q - 1))}
+              className="w-9 h-9 rounded-full border-2 border-bg-nude flex items-center justify-center font-black text-brown-mid hover:border-primary hover:text-primary transition-colors"
+            >
+              −
+            </button>
+            <span className="font-black text-lg text-brown-dark w-6 text-center">{quantity}</span>
+            <button
+              onClick={() => setQuantity(q => q + 1)}
+              className="w-9 h-9 rounded-full border-2 border-bg-nude flex items-center justify-center font-black text-brown-mid hover:border-primary hover:text-primary transition-colors"
+            >
+              +
+            </button>
+          </div>
+        </div>
+
         {/* Botão */}
         <AddToCartButton
           productId={id}
@@ -106,6 +129,7 @@ export function ProductDetail({
           wholesalePrice={wholesalePrice ?? null}
           selectedSize={selectedSize}
           imageUrl={firstImage}
+          quantity={quantity}
         />
 
         {/* Descrição */}

@@ -13,16 +13,12 @@ type Props = {
   wholesalePrice: number | null
   selectedSize: string | null
   imageUrl: string | null
+  quantity?: number
 }
 
 export function AddToCartButton({
-  productId,
-  slug,
-  name,
-  retailPrice,
-  wholesalePrice,
-  selectedSize,
-  imageUrl,
+  productId, slug, name, retailPrice, wholesalePrice,
+  selectedSize, imageUrl, quantity = 1,
 }: Props) {
   const addItem = useCartStore((s) => s.addItem)
   const [added, setAdded] = useState(false)
@@ -30,13 +26,8 @@ export function AddToCartButton({
   function handleClick() {
     if (!selectedSize) return
     addItem({
-      productId,
-      slug,
-      name,
-      size: selectedSize,
-      retailPrice,
-      wholesalePrice,
-      imageUrl,
+      productId, slug, name, size: selectedSize,
+      retailPrice, wholesalePrice, imageUrl, quantity,
     })
     setAdded(true)
     setTimeout(() => setAdded(false), 2000)
