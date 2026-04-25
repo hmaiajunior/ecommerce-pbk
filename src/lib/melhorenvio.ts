@@ -23,6 +23,7 @@ export type ShippingQuote = {
   company: string
   price: number
   deliveryDays: number
+  note?: string // observação do cliente (ex: nome da excursão)
 }
 
 type MelhorEnvioOption = {

@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Truck, ArrowLeft } from "lucide-react"
+import { Truck, ArrowLeft, MessageSquare } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn, formatPrice } from "@/lib/utils"
 import { useCartStore } from "@/store/cart"
@@ -34,8 +34,11 @@ export function ShippingStep({ address, onNext, onBack }: Props) {
   const [selected, setSelected] = useState<ShippingQuote | null>(
     ALLOW_SKIP_SHIPPING ? TEST_SHIPPING_OPTION : null
   )
+  const [note, setNote] = useState("")
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+
+  const isCustom = selected !== null && selected.id < 0
 
   useEffect(() => {
     setLoading(true)
@@ -66,6 +69,11 @@ export function ShippingStep({ address, onNext, onBack }: Props) {
       })
       .finally(() => setLoading(false))
   }, [address.zipCode, items])
+
+  function handleNext() {
+    if (!selected) return
+    onNext({ ...selected, note: isCustom && note.trim() ? note.trim() : undefined })
+  }
 
   return (
     <div className="space-y-5">
@@ -102,7 +110,7 @@ export function ShippingStep({ address, onNext, onBack }: Props) {
           {options.map((opt) => (
             <button
               key={opt.id}
-              onClick={() => setSelected(opt)}
+              onClick={() => { setSelected(opt); setNote("") }}
               className={cn(
                 "w-full flex items-center justify-between p-4 rounded-card border-2 transition-all",
                 selected?.id === opt.id
@@ -115,7 +123,8 @@ export function ShippingStep({ address, onNext, onBack }: Props) {
                 <div className="text-left">
                   <p className="font-extrabold text-sm text-brown-dark">{opt.service}</p>
                   <p className="font-semibold text-xs text-brown-muted">
-                    {opt.company} · {opt.deliveryDays} dia{opt.deliveryDays !== 1 ? "s" : ""} úteis
+                    {opt.company}
+                    {opt.deliveryDays > 0 && ` · ${opt.deliveryDays} dia${opt.deliveryDays !== 1 ? "s" : ""} úteis`}
                   </p>
                 </div>
               </div>
@@ -127,11 +136,31 @@ export function ShippingStep({ address, onNext, onBack }: Props) {
         </div>
       )}
 
+      {/* Campo de observação para opções customizadas */}
+      {isCustom && (
+        <div className="bg-accent/10 border border-accent/30 rounded-card p-4 space-y-2">
+          <div className="flex items-center gap-2">
+            <MessageSquare size={15} className="text-brown-mid" />
+            <p className="font-extrabold text-sm text-brown-dark">Observação</p>
+          </div>
+          <p className="text-xs font-semibold text-brown-muted">
+            Informe o nome da excursão, horário de entrega ou qualquer detalhe importante.
+          </p>
+          <textarea
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder="Ex: Excursão Clube das Mães — entrega às 14h"
+            rows={3}
+            className="w-full border border-bg-nude rounded-lg px-3 py-2 text-sm font-semibold text-brown-dark placeholder:text-brown-muted outline-none focus:border-primary resize-none"
+          />
+        </div>
+      )}
+
       <Button
         size="lg"
         className="w-full"
         disabled={!selected || loading}
-        onClick={() => selected && onNext(selected)}
+        onClick={handleNext}
       >
         Continuar para o pagamento →
       </Button>
