@@ -123,13 +123,39 @@ export default function AdminProdutosPage() {
     setEditing(null)
   }
 
+  const [uploadStatus, setUploadStatus] = useState<"idle" | "uploading" | "success" | "error">("idle")
+  const [uploadMsg, setUploadMsg] = useState("")
+
   async function handleImageUpload(productId: string, file: File) {
     setUploadingFor(productId)
+    setUploadStatus("uploading")
+    setUploadMsg("")
     const fd = new FormData()
     fd.append("file", file)
-    await fetch(`/api/admin/products/${productId}/images`, { method: "POST", body: fd })
+    const res = await fetch(`/api/admin/products/${productId}/images`, { method: "POST", body: fd })
+    const json = await res.json().catch(() => ({}))
     setUploadingFor(null)
+    if (!res.ok) {
+      setUploadStatus("error")
+      setUploadMsg(json.error ?? "Erro ao enviar imagem.")
+    } else {
+      setUploadStatus("success")
+      setUploadMsg("Imagem enviada com sucesso!")
+      setTimeout(() => setUploadStatus("idle"), 3000)
+    }
     qc.invalidateQueries({ queryKey: ["admin-products"] })
+  }
+
+  async function handleMultiUpload(files: File[], productId: string, currentCount: number) {
+    const slots = 5 - currentCount
+    const toUpload = files.slice(0, slots)
+    for (const file of toUpload) {
+      await handleImageUpload(productId, file)
+    }
+    if (files.length > slots) {
+      setUploadStatus("error")
+      setUploadMsg(`Limite de 5 imagens atingido. ${files.length - slots} arquivo(s) ignorado(s).`)
+    }
   }
 
   return (
@@ -225,8 +251,8 @@ export default function AdminProdutosPage() {
                   <>
                     <button
                       onClick={() => fileRef.current?.click()}
-                      disabled={uploadingFor === (editing as Product).id}
-                      className="w-20 h-20 rounded-lg border-2 border-dashed border-bg-nude flex flex-col items-center justify-center text-brown-muted hover:border-primary hover:text-primary transition-colors"
+                      disabled={!!uploadingFor}
+                      className="w-20 h-20 rounded-lg border-2 border-dashed border-bg-nude flex flex-col items-center justify-center text-brown-muted hover:border-primary hover:text-primary transition-colors disabled:opacity-50"
                     >
                       <ImageIcon size={18} />
                       <span className="text-[10px] font-bold mt-1">{uploadingFor ? "..." : "Adicionar"}</span>
@@ -234,10 +260,8 @@ export default function AdminProdutosPage() {
                     <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" multiple className="hidden"
                       onChange={async e => {
                         const files = Array.from(e.target.files ?? [])
-                        const product = editing as Product
-                        const slots = 5 - product.images.length
-                        for (const file of files.slice(0, slots)) {
-                          await handleImageUpload(product.id, file)
+                        if (files.length > 0) {
+                          await handleMultiUpload(files, (editing as Product).id, (editing as Product).images.length)
                         }
                         e.target.value = ""
                       }}
@@ -245,6 +269,11 @@ export default function AdminProdutosPage() {
                   </>
                 )}
               </div>
+              {uploadStatus !== "idle" && (
+                <p className={`text-xs font-bold mt-2 ${uploadStatus === "success" ? "text-green-600" : uploadStatus === "error" ? "text-red-500" : "text-brown-muted"}`}>
+                  {uploadStatus === "uploading" ? "Enviando imagem..." : uploadMsg}
+                </p>
+              )}
             </div>
           )}
 
