@@ -8,21 +8,15 @@ import { useUIStore } from "@/store/ui"
 import { CartItem } from "./CartItem"
 import { Button } from "@/components/ui/button"
 import { formatPrice } from "@/lib/utils"
-import { useSession } from "next-auth/react"
 
 export function CartDrawer() {
   const { cartOpen, closeCart } = useUIStore()
   const { items, subtotal } = useCartStore()
-  const { data: session, status } = useSession()
   const router = useRouter()
 
   function handleCheckout() {
     closeCart()
-    if (status === "authenticated") {
-      router.push("/checkout")
-    } else {
-      router.push("/login?callbackUrl=/checkout")
-    }
+    router.push("/checkout")
   }
 
   return (
