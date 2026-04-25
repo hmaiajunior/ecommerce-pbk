@@ -1,20 +1,31 @@
 "use client"
 
 import { useState, useTransition } from "react"
-import { useRouter } from "next/navigation"
-import { checkEmailExists, guestSignIn } from "@/actions/guest-checkout"
+import { signIn } from "next-auth/react"
+import { checkEmailExists, ensureGuestUser } from "@/actions/guest-checkout"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export function IdentityStep() {
-  const router = useRouter()
   const [step, setStep] = useState<"email" | "name">("email")
   const [email, setEmail] = useState("")
   const [name, setName] = useState("")
   const [error, setError] = useState("")
   const [isPending, startTransition] = useTransition()
+
+  async function doSignIn(normalizedEmail: string) {
+    const result = await signIn("guest-checkout", {
+      email: normalizedEmail,
+      guestSecret: process.env.NEXT_PUBLIC_GUEST_CHECKOUT_SECRET,
+      redirect: true,
+      callbackUrl: "/checkout",
+    })
+    if (result?.error) {
+      setError("Ops! Algo deu errado. Por favor, tente novamente em instantes.")
+    }
+  }
 
   function handleEmailSubmit() {
     setError("")
@@ -27,13 +38,7 @@ export function IdentityStep() {
     startTransition(async () => {
       const exists = await checkEmailExists(trimmed)
       if (exists) {
-        const result = await guestSignIn(trimmed)
-        if (result.ok) {
-          router.push("/checkout")
-          router.refresh()
-        } else {
-          setError("Ops! Algo deu errado. Por favor, tente novamente em instantes.")
-        }
+        await doSignIn(trimmed)
       } else {
         setStep("name")
       }
@@ -48,13 +53,12 @@ export function IdentityStep() {
     }
 
     startTransition(async () => {
-      const result = await guestSignIn(email.trim().toLowerCase(), name.trim())
-      if (result.ok) {
-        router.push("/checkout")
-        router.refresh()
-      } else {
+      const result = await ensureGuestUser(email.trim().toLowerCase(), name.trim())
+      if (!result.ok) {
         setError("Ops! Algo deu errado. Por favor, tente novamente em instantes.")
+        return
       }
+      await doSignIn(result.email)
     })
   }
 
@@ -80,12 +84,7 @@ export function IdentityStep() {
             autoComplete="email"
           />
           {error && <p className="text-xs font-bold text-red-500">{error}</p>}
-          <Button
-            size="lg"
-            className="w-full"
-            onClick={handleEmailSubmit}
-            disabled={isPending || !email.trim()}
-          >
+          <Button size="lg" className="w-full" onClick={handleEmailSubmit} disabled={isPending || !email.trim()}>
             {isPending ? "Verificando..." : "Continuar →"}
           </Button>
         </div>
@@ -106,21 +105,10 @@ export function IdentityStep() {
           />
           {error && <p className="text-xs font-bold text-red-500">{error}</p>}
           <div className="flex gap-3">
-            <Button
-              variant="secondary"
-              size="lg"
-              className="flex-1"
-              onClick={() => { setStep("email"); setError("") }}
-              disabled={isPending}
-            >
+            <Button variant="secondary" size="lg" className="flex-1" onClick={() => { setStep("email"); setError("") }} disabled={isPending}>
               ← Voltar
             </Button>
-            <Button
-              size="lg"
-              className="flex-1"
-              onClick={handleNameSubmit}
-              disabled={isPending || !name.trim()}
-            >
+            <Button size="lg" className="flex-1" onClick={handleNameSubmit} disabled={isPending || !name.trim()}>
               {isPending ? "Aguarde..." : "Continuar →"}
             </Button>
           </div>

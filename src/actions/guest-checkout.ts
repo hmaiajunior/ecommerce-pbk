@@ -2,7 +2,6 @@
 
 import crypto from "crypto"
 import bcrypt from "bcryptjs"
-import { signIn } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { redis } from "@/lib/redis"
 import { sendGuestWelcomeEmail } from "@/lib/email"
@@ -18,10 +17,11 @@ export async function checkEmailExists(email: string): Promise<boolean> {
   return !!user
 }
 
-export async function guestSignIn(
+// Garante que o usuário existe (cria se necessário) e retorna o e-mail normalizado
+export async function ensureGuestUser(
   email: string,
   name?: string
-): Promise<{ ok: true } | { ok: false; error: string }> {
+): Promise<{ ok: true; email: string } | { ok: false; error: string }> {
   try {
     const normalizedEmail = email.toLowerCase().trim()
 
@@ -35,7 +35,6 @@ export async function guestSignIn(
         data: { email: normalizedEmail, name: displayName, password: tempPassword },
       })
 
-      // Gera link para o novo usuário definir a própria senha (24h)
       const token = crypto.randomBytes(32).toString("hex")
       await redis.setex(`reset-password:${token}`, SET_PASSWORD_TTL, user.id)
       const setPasswordUrl = `${APP_URL}/resetar-senha?token=${token}`
@@ -45,13 +44,7 @@ export async function guestSignIn(
       )
     }
 
-    await signIn("guest-checkout", {
-      email: normalizedEmail,
-      guestSecret: process.env.GUEST_CHECKOUT_SECRET,
-      redirect: false,
-    })
-
-    return { ok: true }
+    return { ok: true, email: normalizedEmail }
   } catch (err) {
     console.error("[guest-checkout] erro:", err)
     return { ok: false, error: "Não foi possível continuar. Tente novamente." }
