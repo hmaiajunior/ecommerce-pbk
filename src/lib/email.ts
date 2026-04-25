@@ -101,6 +101,8 @@ export async function sendOrderCancellationEmail(
     `,
   })
 }
+
+export async function sendOrderConfirmationEmail(
   email: string,
   name: string,
   orderId: string
