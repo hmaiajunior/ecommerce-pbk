@@ -21,7 +21,10 @@ type Props = {
 }
 
 export function PaymentStep({ address, shipping, coupon, onBack }: Props) {
-  const { items, clearCart } = useCartStore()
+  const { items, subtotal, clearCart } = useCartStore()
+  const sub = subtotal()
+  const discount = coupon?.discount ?? 0
+  const total = sub - discount + shipping.price
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
@@ -95,7 +98,7 @@ export function PaymentStep({ address, shipping, coupon, onBack }: Props) {
 
       <div className="border-t border-bg-nude pt-4">
         <p className="text-sm font-semibold text-brown-muted mb-3 text-center">
-          Total a pagar: <strong className="text-primary font-black text-lg">{formatPrice(shipping.price)}</strong>
+          Total a pagar: <strong className="text-primary font-black text-lg">{formatPrice(total)}</strong>
           <span className="text-xs ml-1">(frete incluso)</span>
         </p>
         <Button
