@@ -36,6 +36,22 @@ export function ProductDetail({
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
   const [quantity, setQuantity] = useState(1)
 
+  const selectedStock = sizes.find(s => s.size === selectedSize)?.stock ?? Infinity
+
+  function handleSizeChange(size: string) {
+    setSelectedSize(size)
+    setQuantity(1) // reset ao trocar tamanho
+  }
+
+  function handleQuantityChange(delta: number) {
+    setQuantity(q => {
+      const next = q + delta
+      if (next < 1) return 1
+      if (next > selectedStock) return selectedStock
+      return next
+    })
+  }
+
   const isWholesale = status === "authenticated"
     && session?.user.role === "WHOLESALE"
     && session.user.wholesaleApproved === true
@@ -95,7 +111,7 @@ export function ProductDetail({
         <SizeSelector
           sizes={sizes}
           selected={selectedSize}
-          onChange={setSelectedSize}
+          onChange={handleSizeChange}
         />
 
         {/* Quantidade */}
@@ -105,18 +121,25 @@ export function ProductDetail({
           </p>
           <div className="flex items-center gap-3">
             <button
-              onClick={() => setQuantity(q => Math.max(1, q - 1))}
-              className="w-9 h-9 rounded-full border-2 border-bg-nude flex items-center justify-center font-black text-brown-mid hover:border-primary hover:text-primary transition-colors"
+              onClick={() => handleQuantityChange(-1)}
+              disabled={quantity <= 1}
+              className="w-9 h-9 rounded-full border-2 border-bg-nude flex items-center justify-center font-black text-brown-mid hover:border-primary hover:text-primary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               −
             </button>
             <span className="font-black text-lg text-brown-dark w-6 text-center">{quantity}</span>
             <button
-              onClick={() => setQuantity(q => q + 1)}
-              className="w-9 h-9 rounded-full border-2 border-bg-nude flex items-center justify-center font-black text-brown-mid hover:border-primary hover:text-primary transition-colors"
+              onClick={() => handleQuantityChange(1)}
+              disabled={quantity >= selectedStock}
+              className="w-9 h-9 rounded-full border-2 border-bg-nude flex items-center justify-center font-black text-brown-mid hover:border-primary hover:text-primary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               +
             </button>
+            {selectedSize && quantity >= selectedStock && (
+              <span className="text-xs font-bold text-amber-500">
+                Máximo disponível: {selectedStock}
+              </span>
+            )}
           </div>
         </div>
 
