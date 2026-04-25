@@ -38,7 +38,7 @@ export function ShippingStep({ address, onNext, onBack }: Props) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
 
-  const isCustom = selected !== null && selected.id < 0
+  const isCustom = selected !== null && Number(selected.id) < 0
 
   useEffect(() => {
     setLoading(true)

@@ -26,9 +26,9 @@ function getCustomOptions(): ShippingQuote[] {
     if (!raw) return []
     const parsed = JSON.parse(raw)
     return parsed.map((o: any, i: number) => ({
-      id: -(i + 1),
-      service: o.service,
-      company: o.company ?? "Loja",
+      id: -(i + 1) as number,
+      service: String(o.service),
+      company: String(o.company ?? "Loja"),
       price: Number(o.price),
       deliveryDays: Number(o.deliveryDays ?? 0),
     }))
