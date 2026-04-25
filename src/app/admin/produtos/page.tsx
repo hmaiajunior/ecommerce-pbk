@@ -206,7 +206,9 @@ export default function AdminProdutosPage() {
           {/* Imagens (apenas ao editar) */}
           {editing !== "new" && (
             <div className="mt-5">
-              <p className="text-xs font-black uppercase tracking-wider text-brown-muted mb-3">Imagens</p>
+              <p className="text-xs font-black uppercase tracking-wider text-brown-muted mb-3">
+                Imagens <span className="text-brown-light font-semibold normal-case tracking-normal">({(editing as Product).images.length}/5)</span>
+              </p>
               <div className="flex flex-wrap gap-3">
                 {(editing as Product).images.map(img => (
                   <div key={img.id} className="relative w-20 h-20 rounded-lg overflow-hidden bg-bg-blush">
@@ -219,21 +221,27 @@ export default function AdminProdutosPage() {
                     </button>
                   </div>
                 ))}
-                <button
-                  onClick={() => fileRef.current?.click()}
-                  disabled={uploadingFor === (editing as Product).id}
-                  className="w-20 h-20 rounded-lg border-2 border-dashed border-bg-nude flex flex-col items-center justify-center text-brown-muted hover:border-primary hover:text-primary transition-colors"
+                {(editing as Product).images.length < 5 && (
+                  <button
+                    onClick={() => fileRef.current?.click()}
+                    disabled={uploadingFor === (editing as Product).id}
+                    className="w-20 h-20 rounded-lg border-2 border-dashed border-bg-nude flex flex-col items-center justify-center text-brown-muted hover:border-primary hover:text-primary transition-colors"
                 >
                   <ImageIcon size={18} />
                   <span className="text-[10px] font-bold mt-1">{uploadingFor ? "..." : "Adicionar"}</span>
                 </button>
-                <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden"
-                  onChange={e => {
-                    const file = e.target.files?.[0]
-                    if (file) handleImageUpload((editing as Product).id, file)
+                <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" multiple className="hidden"
+                  onChange={async e => {
+                    const files = Array.from(e.target.files ?? [])
+                    const product = editing as Product
+                    const slots = 5 - product.images.length
+                    for (const file of files.slice(0, slots)) {
+                      await handleImageUpload(product.id, file)
+                    }
                     e.target.value = ""
                   }}
                 />
+                )}
               </div>
             </div>
           )}
