@@ -16,15 +16,12 @@ export function IdentityStep() {
   const [isPending, startTransition] = useTransition()
 
   async function doSignIn(normalizedEmail: string) {
-    const result = await signIn("guest-checkout", {
+    await signIn("guest-checkout", {
       email: normalizedEmail,
       guestSecret: process.env.NEXT_PUBLIC_GUEST_CHECKOUT_SECRET,
       redirect: true,
       callbackUrl: "/checkout",
     })
-    if (result?.error) {
-      setError("Ops! Algo deu errado. Por favor, tente novamente em instantes.")
-    }
   }
 
   function handleEmailSubmit() {
