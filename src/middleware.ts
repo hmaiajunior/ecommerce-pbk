@@ -16,7 +16,7 @@ export default auth((req) => {
     }
   }
 
-  if (pathname.startsWith("/minha-conta") || pathname.startsWith("/checkout")) {
+  if (pathname.startsWith("/minha-conta")) {
     if (!session) {
       return NextResponse.redirect(
         `${origin}/login?callbackUrl=${encodeURIComponent(pathname)}`

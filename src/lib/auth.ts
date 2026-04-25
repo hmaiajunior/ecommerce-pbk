@@ -43,6 +43,34 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
       },
     }),
+    // Provider interno — usado exclusivamente pelo fluxo de guest checkout.
+    // Valida um segredo de servidor para evitar uso externo.
+    Credentials({
+      id: "guest-checkout",
+      credentials: { email: {}, guestSecret: {} },
+      authorize: async (credentials) => {
+        if (
+          !credentials?.guestSecret ||
+          credentials.guestSecret !== process.env.GUEST_CHECKOUT_SECRET
+        ) {
+          return null
+        }
+
+        const email = String(credentials.email ?? "").toLowerCase().trim()
+        if (!email) return null
+
+        const user = await prisma.user.findUnique({ where: { email } })
+        if (!user) return null
+
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          wholesaleApproved: user.wholesaleApproved,
+        }
+      },
+    }),
   ],
   callbacks: {
     jwt({ token, user }) {

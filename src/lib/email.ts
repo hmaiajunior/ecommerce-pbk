@@ -36,6 +36,25 @@ export async function sendWholesaleApprovalEmail(email: string, name: string) {
   })
 }
 
+export async function sendGuestWelcomeEmail(
+  email: string,
+  name: string,
+  setPasswordUrl: string
+) {
+  await getResend().emails.send({
+    from: FROM,
+    to: email,
+    subject: "Sua conta foi criada — Playbekids",
+    html: `
+      <p>Olá, ${name}!</p>
+      <p>Sua compra foi iniciada e criamos uma conta para você na Playbekids.</p>
+      <p>Para acessar seus pedidos e gerenciar sua conta, crie sua senha clicando no link abaixo:</p>
+      <p><a href="${setPasswordUrl}">Criar minha senha</a></p>
+      <p>O link expira em 24 horas. Se preferir, pode ignorar este e-mail — seu pedido será processado normalmente.</p>
+    `,
+  })
+}
+
 export async function sendOrderConfirmationEmail(
   email: string,
   name: string,
