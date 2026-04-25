@@ -268,12 +268,15 @@ export default function AdminProdutosPage() {
         <div className="bg-white rounded-card shadow-[var(--shadow-card)] overflow-hidden">
           <table className="w-full text-sm">
             <thead className="border-b border-bg-nude bg-bg-blush">
-              <tr>{["Produto","Categoria","Varejo","Atacado","Ativo","Ações"].map(h => (
+              <tr>{["Produto","Categoria","Varejo","Atacado","Estoque","Ativo","Ações"].map(h => (
                 <th key={h} className="text-left py-3 px-4 text-xs font-black uppercase tracking-wider text-brown-muted">{h}</th>
               ))}</tr>
             </thead>
             <tbody>
-              {(products ?? []).map(p => (
+              {(products ?? []).map(p => {
+                const totalStock = p.sizes.reduce((sum: number, s: { stock: number }) => sum + s.stock, 0)
+                const stockColor = totalStock === 0 ? "text-red-500" : totalStock <= 5 ? "text-amber-500" : "text-green-700"
+                return (
                 <tr key={p.id} className="border-b border-bg-nude hover:bg-bg-blush/50 transition-colors">
                   <td className="py-3 px-4">
                     <div className="flex items-center gap-3">
@@ -290,6 +293,12 @@ export default function AdminProdutosPage() {
                   <td className="py-3 px-4 font-extrabold text-primary">{formatPrice(Number(p.retailPrice))}</td>
                   <td className="py-3 px-4 font-semibold text-brown-muted">{p.wholesalePrice ? formatPrice(Number(p.wholesalePrice)) : "—"}</td>
                   <td className="py-3 px-4">
+                    <span className={cn("font-extrabold text-sm", stockColor)}>
+                      {totalStock}
+                    </span>
+                    <span className="font-semibold text-xs text-brown-muted ml-1">un</span>
+                  </td>
+                  <td className="py-3 px-4">
                     <span className={cn("px-2 py-0.5 rounded-pill text-[11px] font-extrabold", p.active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-500")}>
                       {p.active ? "Sim" : "Não"}
                     </span>
@@ -302,7 +311,8 @@ export default function AdminProdutosPage() {
                     </div>
                   </td>
                 </tr>
-              ))}
+                )}
+              )}
             </tbody>
           </table>
           {(products ?? []).length === 0 && (
