@@ -106,7 +106,7 @@ export async function createOrder(
 
   try {
     const order = await prisma.$transaction(async (tx) => {
-      // Valida estoque e decrementa atomicamente
+      // Valida estoque e move para reserva atomicamente
       for (const item of input.items) {
         const productSize = await tx.productSize.findUnique({
           where: {
@@ -126,7 +126,10 @@ export async function createOrder(
           where: {
             productId_size: { productId: item.productId, size: item.size },
           },
-          data: { stock: { decrement: item.quantity } },
+          data: {
+            stock: { decrement: item.quantity },
+            stockReserved: { increment: item.quantity },
+          },
         })
       }
 

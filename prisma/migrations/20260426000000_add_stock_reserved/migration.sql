@@ -1,0 +1,1 @@
+ALTER TABLE "ProductSize" ADD COLUMN "stockReserved" INTEGER NOT NULL DEFAULT 0;

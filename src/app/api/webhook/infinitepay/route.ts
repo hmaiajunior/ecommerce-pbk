@@ -94,6 +94,20 @@ export async function POST(req: NextRequest) {
       paymentStatus === "APPROVED" &&
       order.paymentStatus !== "APPROVED"
     ) {
+      // Baixa definitiva: remove da reserva (stock já foi decrementado em createOrder)
+      const orderWithItems = await prisma.order.findUnique({
+        where: { id: order.id },
+        include: { items: true },
+      })
+      if (orderWithItems) {
+        for (const item of orderWithItems.items) {
+          await prisma.productSize.updateMany({
+            where: { productId: item.productId, size: item.size },
+            data: { stockReserved: { decrement: item.quantity } },
+          })
+        }
+      }
+
       await sendOrderConfirmationEmail(
         order.user.email ?? "",
         order.user.name ?? "",

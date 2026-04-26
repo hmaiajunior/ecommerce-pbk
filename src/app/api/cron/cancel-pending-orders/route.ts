@@ -45,7 +45,10 @@ export async function GET(req: NextRequest) {
         for (const item of order.items) {
           await tx.productSize.updateMany({
             where: { productId: item.productId, size: item.size },
-            data: { stock: { increment: item.quantity } },
+            data: {
+              stock: { increment: item.quantity },
+              stockReserved: { decrement: item.quantity },
+            },
           })
         }
       })
