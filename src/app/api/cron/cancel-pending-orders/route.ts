@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { sendOrderCancellationEmail } from "@/lib/email"
+import { invalidateProduct } from "@/lib/cache"
 
 export async function GET(req: NextRequest) {
   // Valida o secret para evitar chamadas não autorizadas
@@ -21,7 +22,7 @@ export async function GET(req: NextRequest) {
       user: { select: { email: true, name: true } },
       items: {
         include: {
-          product: { select: { name: true } },
+          product: { select: { name: true, slug: true } },
         },
       },
     },
@@ -64,6 +65,11 @@ export async function GET(req: NextRequest) {
           quantity: i.quantity,
           price: Number(i.price),
         }))
+      )
+
+      // Invalida cache dos produtos com estoque devolvido
+      await Promise.all(
+        order.items.map((i) => invalidateProduct(i.product.slug))
       )
 
       cancelled++

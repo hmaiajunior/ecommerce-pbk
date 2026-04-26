@@ -2,7 +2,7 @@
 
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { invalidateByPattern } from "@/lib/cache"
+import { invalidateByPattern, invalidateProduct } from "@/lib/cache"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -163,7 +163,11 @@ export async function createOrder(
     })
 
     // Invalida cache dos produtos com estoque alterado
-    await invalidateByPattern("products:list:*")
+    const slugs = await prisma.product.findMany({
+      where: { id: { in: input.items.map((i) => i.productId) } },
+      select: { slug: true },
+    })
+    await Promise.all(slugs.map((p) => invalidateProduct(p.slug)))
 
     return { orderId: order.id }
   } catch (err) {
