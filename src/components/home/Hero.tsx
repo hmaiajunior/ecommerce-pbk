@@ -18,7 +18,7 @@ export function Hero() {
       {/* Conteúdo */}
       <div className="relative z-10 max-w-[560px]">
         <Badge variant="yellow" size="lg" className="mb-5">
-          Nova Coleção 2025 🌟
+          Nova Coleção 2026 🌟
         </Badge>
 
         <h1 className="font-black text-[clamp(36px,6vw,56px)] leading-[1.1] text-brown-dark mb-4">
