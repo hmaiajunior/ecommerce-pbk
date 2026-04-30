@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { useCartStore } from "@/store/cart"
 import { formatPrice } from "@/lib/utils"
 import { useSession } from "next-auth/react"
+import { WishlistButton } from "./WishlistButton"
 
 type ProductCardProps = {
   id: string
@@ -91,6 +92,9 @@ export function ProductCard({
             <Badge variant="atacado">Atacado</Badge>
           </div>
         )}
+        <div className={`absolute ${showWholesale ? "top-12" : "top-3"} right-3`}>
+          <WishlistButton productId={id} variant="card" />
+        </div>
       </div>
 
       {/* Corpo */}

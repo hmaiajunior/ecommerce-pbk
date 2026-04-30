@@ -3,11 +3,12 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { signOut } from "next-auth/react"
-import { ShoppingBag, User, MapPin, LogOut } from "lucide-react"
+import { ShoppingBag, User, MapPin, LogOut, Heart } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const LINKS = [
   { href: "/minha-conta/pedidos",   label: "Meus pedidos",     icon: ShoppingBag },
+  { href: "/minha-conta/favoritos", label: "Favoritos",        icon: Heart       },
   { href: "/minha-conta/dados",     label: "Dados cadastrais", icon: User        },
   { href: "/minha-conta/enderecos", label: "Endereços",        icon: MapPin      },
 ]

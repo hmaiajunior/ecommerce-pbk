@@ -52,6 +52,7 @@ model User {
   addresses Address[]
   accounts  Account[]
   sessions  Session[]
+  wishlist  Wishlist[]
 }
 
 // ─── Catálogo ─────────────────────────────────────────────────────────────────
@@ -93,6 +94,20 @@ model Product {
   images     ProductImage[]
   sizes      ProductSize[]
   orderItems OrderItem[]
+  wishlist   Wishlist[]
+}
+
+model Wishlist {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([userId])
 }
 
 model ProductImage {

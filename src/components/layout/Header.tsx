@@ -4,7 +4,8 @@ import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useSession, signOut } from "next-auth/react"
-import { ShoppingBag, Search, Menu, X, User, LogOut } from "lucide-react"
+import { ShoppingBag, Search, Menu, X, User, LogOut, Heart } from "lucide-react"
+import { useWishlistStore } from "@/store/wishlist"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -22,6 +23,7 @@ export function Header() {
   const pathname = usePathname()
   const { data: session } = useSession()
   const itemCount = useCartStore((s) => s.itemCount())
+  const wishlistCount = useWishlistStore((s) => s.ids.size)
   const openCart = useUIStore((s) => s.openCart)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -75,6 +77,21 @@ export function Header() {
           >
             <Search size={16} />
           </Link>
+
+          {session && (
+            <Link
+              href="/minha-conta/favoritos"
+              className="relative hidden md:flex w-[38px] h-[38px] rounded-full bg-bg-blush items-center justify-center text-brown-mid hover:bg-bg-nude transition-colors"
+              aria-label="Favoritos"
+            >
+              <Heart size={16} />
+              {wishlistCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-primary text-white w-[18px] h-[18px] rounded-full text-[10px] font-black flex items-center justify-center">
+                  {wishlistCount > 9 ? "9+" : wishlistCount}
+                </span>
+              )}
+            </Link>
+          )}
 
           {session ? (
             <div

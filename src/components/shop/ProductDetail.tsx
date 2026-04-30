@@ -4,6 +4,7 @@ import { useState } from "react"
 import { ProductGallery } from "./ProductGallery"
 import { SizeSelector } from "./SizeSelector"
 import { AddToCartButton } from "./AddToCartButton"
+import { WishlistButton } from "./WishlistButton"
 import { Badge } from "@/components/ui/badge"
 import { formatPrice } from "@/lib/utils"
 import { useSession } from "next-auth/react"
@@ -143,17 +144,22 @@ export function ProductDetail({
           </div>
         </div>
 
-        {/* Botão */}
-        <AddToCartButton
-          productId={id}
-          slug={slug}
-          name={name}
-          retailPrice={retailPrice}
-          wholesalePrice={wholesalePrice ?? null}
-          selectedSize={selectedSize}
-          imageUrl={firstImage}
-          quantity={quantity}
-        />
+        {/* Botão de compra + favorito */}
+        <div className="flex gap-3 items-stretch">
+          <div className="flex-1">
+            <AddToCartButton
+              productId={id}
+              slug={slug}
+              name={name}
+              retailPrice={retailPrice}
+              wholesalePrice={wholesalePrice ?? null}
+              selectedSize={selectedSize}
+              imageUrl={firstImage}
+              quantity={quantity}
+            />
+          </div>
+          <WishlistButton productId={id} variant="detail" />
+        </div>
 
         {/* Descrição */}
         {description && (
