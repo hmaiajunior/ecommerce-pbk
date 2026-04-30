@@ -6,6 +6,7 @@ import { X, ShoppingBag } from "lucide-react"
 import { useCartStore } from "@/store/cart"
 import { useUIStore } from "@/store/ui"
 import { CartItem } from "./CartItem"
+import { FreeShippingProgress } from "./FreeShippingProgress"
 import { Button } from "@/components/ui/button"
 import { formatPrice } from "@/lib/utils"
 
@@ -82,6 +83,7 @@ export function CartDrawer() {
         {/* Footer */}
         {items.length > 0 && (
           <div className="px-5 py-5 border-t border-bg-nude space-y-3">
+            <FreeShippingProgress subtotal={subtotal()} />
             <div className="flex justify-between items-center">
               <span className="font-bold text-sm text-brown-muted">Subtotal</span>
               <span className="font-black text-xl text-brown-dark">{formatPrice(subtotal())}</span>
@@ -94,7 +96,6 @@ export function CartDrawer() {
               size="lg"
               className="w-full"
               onClick={handleCheckout}
-              disabled={status === "loading"}
             >
               Finalizar compra
             </Button>

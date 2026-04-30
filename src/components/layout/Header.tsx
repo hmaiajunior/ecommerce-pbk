@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { useCartStore } from "@/store/cart"
 import { useUIStore } from "@/store/ui"
+import { AnnouncementBar } from "./AnnouncementBar"
 
 const navItems = [
   { href: "/",        label: "Início" },
@@ -27,6 +28,7 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-bg-nude bg-bg-cream/90 backdrop-blur-md">
+      <AnnouncementBar />
       <div className="mx-auto flex h-[68px] max-w-7xl items-center justify-between px-4 md:px-8">
 
         {/* Logo + nome */}

@@ -10,6 +10,8 @@ import { AddressStep } from "@/components/checkout/AddressStep"
 import { ShippingStep } from "@/components/checkout/ShippingStep"
 import { PaymentStep } from "@/components/checkout/PaymentStep"
 import { IdentityStep } from "@/components/checkout/IdentityStep"
+import { TrustBadges } from "@/components/checkout/TrustBadges"
+import { FreeShippingProgress } from "@/components/cart/FreeShippingProgress"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import Link from "next/link"
@@ -25,6 +27,7 @@ export default function CheckoutPage() {
   const { status } = useSession()
   const items = useCartStore((s) => s.items)
   const coupon = useCartStore((s) => s.coupon)
+  const subtotal = useCartStore((s) => s.subtotal())
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const [address, setAddress] = useState<Address | null>(null)
   const [shipping, setShipping] = useState<ShippingQuote | null>(null)
@@ -62,8 +65,10 @@ export default function CheckoutPage() {
           <div className="lg:col-span-2 bg-white rounded-card p-6 shadow-[0_2px_16px_rgba(61,43,31,0.07)]">
             <IdentityStep />
           </div>
-          <div>
+          <div className="space-y-4">
+            <FreeShippingProgress subtotal={subtotal} />
             <OrderSummary />
+            <TrustBadges />
           </div>
         </div>
       </div>
@@ -110,8 +115,10 @@ export default function CheckoutPage() {
         </div>
 
         {/* Resumo */}
-        <div>
+        <div className="space-y-4">
+          <FreeShippingProgress subtotal={subtotal} />
           <OrderSummary shippingCost={shipping?.price} discount={coupon?.discount} />
+          <TrustBadges />
         </div>
       </div>
     </div>
