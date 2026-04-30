@@ -106,6 +106,13 @@ export async function createOrder(
 
   try {
     const order = await prisma.$transaction(async (tx) => {
+      // Busca o role do usuário para determinar o preço correto
+      const user = await tx.user.findUnique({
+        where: { id: userId },
+        select: { role: true, wholesaleApproved: true },
+      })
+      const isWholesale = user?.role === "WHOLESALE" && user.wholesaleApproved === true
+
       // Valida estoque e move para reserva atomicamente
       for (const item of input.items) {
         const productSize = await tx.productSize.findUnique({
@@ -133,6 +140,23 @@ export async function createOrder(
         })
       }
 
+      // Busca preços do banco para cada produto (ignora preços enviados pelo cliente)
+      const productIds = input.items.map((i) => i.productId)
+      const products = await tx.product.findMany({
+        where: { id: { in: productIds } },
+        select: { id: true, retailPrice: true, wholesalePrice: true },
+      })
+      const priceMap = new Map(products.map((p) => [p.id, p]))
+
+      const resolvedItems = input.items.map((item) => {
+        const product = priceMap.get(item.productId)
+        if (!product) throw new Error(`Produto não encontrado: ${item.productId}`)
+        const price = isWholesale && product.wholesalePrice
+          ? Number(product.wholesalePrice)
+          : Number(product.retailPrice)
+        return { ...item, price }
+      })
+
       // Incrementa uso do cupom
       if (couponId) {
         await tx.coupon.update({
@@ -141,16 +165,24 @@ export async function createOrder(
         })
       }
 
+      // Recalcula total com preços do banco (ignora valores do cliente)
+      const resolvedSubtotal = resolvedItems.reduce(
+        (sum, item) => sum + item.price * item.quantity, 0
+      )
+      const resolvedTotal = parseFloat(
+        (resolvedSubtotal - couponDiscount + input.shippingCost).toFixed(2)
+      )
+
       // Cria o pedido com seus itens
       return tx.order.create({
         data: {
           userId,
           addressId: input.addressId,
           shippingCost: input.shippingCost,
-          total,
+          total: resolvedTotal,
           couponId,
           items: {
-            create: input.items.map((item) => ({
+            create: resolvedItems.map((item) => ({
               productId: item.productId,
               size: item.size,
               quantity: item.quantity,
