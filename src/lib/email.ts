@@ -102,6 +102,79 @@ export async function sendOrderCancellationEmail(
   })
 }
 
+export async function sendAbandonedCartEmail(
+  email: string,
+  name: string,
+  items: { name: string; size: string; quantity: number; price: number; imageUrl: string | null; slug: string }[],
+  subtotal: number
+) {
+  const subtotalFormatted = subtotal.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  })
+
+  const itemsHtml = items
+    .map(
+      (i) => `
+      <tr>
+        <td style="padding:12px 0;width:64px;vertical-align:top;">
+          ${
+            i.imageUrl
+              ? `<img src="${i.imageUrl}" width="56" height="56" style="border-radius:8px;object-fit:cover;display:block;" alt="" />`
+              : `<div style="width:56px;height:56px;border-radius:8px;background:#FBE6DF;"></div>`
+          }
+        </td>
+        <td style="padding:12px 0 12px 12px;vertical-align:top;">
+          <p style="margin:0;font-size:14px;color:#3D2B1F;font-weight:700;">${i.name}</p>
+          <p style="margin:4px 0 0;font-size:12px;color:#9A7B70;">Tam. ${i.size} · ×${i.quantity}</p>
+        </td>
+        <td style="padding:12px 0;vertical-align:top;text-align:right;">
+          <p style="margin:0;font-size:14px;color:#FF6B4A;font-weight:800;">
+            ${(i.price * i.quantity).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+          </p>
+        </td>
+      </tr>`
+    )
+    .join("")
+
+  await getResend().emails.send({
+    from: FROM,
+    to: email,
+    subject: "Você esqueceu algo lindo no carrinho 💛",
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;background:#FFF8F3;padding:32px 24px;color:#3D2B1F;">
+        <h2 style="margin:0 0 8px;color:#3D2B1F;">Olá, ${name}!</h2>
+        <p style="margin:0 0 20px;font-size:15px;line-height:1.5;color:#6B4F42;">
+          Você deixou itens incríveis no seu carrinho. Garante o seu antes que acabe — temos estoque limitado!
+        </p>
+
+        <table style="width:100%;border-collapse:collapse;background:#fff;border-radius:12px;padding:8px 16px;">
+          <tbody>${itemsHtml}</tbody>
+        </table>
+
+        <table style="width:100%;margin-top:16px;border-top:2px solid #EDE0DC;padding-top:12px;">
+          <tr>
+            <td style="font-size:14px;color:#9A7B70;font-weight:700;">Subtotal</td>
+            <td style="font-size:18px;color:#FF6B4A;font-weight:800;text-align:right;">${subtotalFormatted}</td>
+          </tr>
+        </table>
+
+        <div style="text-align:center;margin:32px 0 8px;">
+          <a href="${APP_URL}/carrinho"
+             style="display:inline-block;background:#FF6B4A;color:#fff;font-weight:800;text-decoration:none;padding:14px 32px;border-radius:999px;font-size:15px;">
+            Voltar para o carrinho →
+          </a>
+        </div>
+
+        <p style="margin:24px 0 0;font-size:12px;color:#9A7B70;text-align:center;line-height:1.5;">
+          Se tiver dúvidas, fale com a gente no Instagram <strong>@playbekids2</strong>.<br/>
+          Você está recebendo este e-mail porque iniciou uma compra na Playbekids.
+        </p>
+      </div>
+    `,
+  })
+}
+
 export async function sendOrderConfirmationEmail(
   email: string,
   name: string,

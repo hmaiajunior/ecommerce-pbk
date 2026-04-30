@@ -12,7 +12,21 @@ export default async function FavoritosPage() {
   const session = await auth()
   if (!session?.user?.id) redirect("/login?callbackUrl=/minha-conta/favoritos")
 
-  const items = await prisma.wishlist.findMany({
+  type WishlistEntry = {
+    product: {
+      id: string
+      name: string
+      slug: string
+      retailPrice: number | string
+      wholesalePrice: number | string | null
+      featured: boolean
+      active: boolean
+      images: { url: string; alt?: string | null }[]
+      sizes: { size: string }[]
+    } | null
+  }
+
+  const items = (await prisma.wishlist.findMany({
     where: { userId: session.user.id },
     orderBy: { createdAt: "desc" },
     include: {
@@ -23,11 +37,11 @@ export default async function FavoritosPage() {
         },
       },
     },
-  })
+  })) as unknown as WishlistEntry[]
 
   const products = items
     .map((i) => i.product)
-    .filter((p) => p && p.active)
+    .filter((p): p is NonNullable<WishlistEntry["product"]> => !!p && p.active)
 
   return (
     <div className="space-y-6">

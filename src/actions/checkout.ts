@@ -169,6 +169,11 @@ export async function createOrder(
     })
     await Promise.all(slugs.map((p) => invalidateProduct(p.slug)))
 
+    // Cliente fechou o pedido — descarta o snapshot de carrinho abandonado
+    await prisma.abandonedCart
+      .delete({ where: { userId } })
+      .catch(() => null)
+
     return { orderId: order.id }
   } catch (err) {
     const message =

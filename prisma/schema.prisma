@@ -48,11 +48,12 @@ model User {
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
-  orders    Order[]
-  addresses Address[]
-  accounts  Account[]
-  sessions  Session[]
-  wishlist  Wishlist[]
+  orders         Order[]
+  addresses      Address[]
+  accounts       Account[]
+  sessions       Session[]
+  wishlist       Wishlist[]
+  abandonedCart  AbandonedCart?
 }
 
 // ─── Catálogo ─────────────────────────────────────────────────────────────────
@@ -108,6 +109,24 @@ model Wishlist {
 
   @@unique([userId, productId])
   @@index([userId])
+}
+
+// ─── Recuperação de carrinho abandonado ──────────────────────────────────────
+// Snapshot do carrinho persistido no servidor para enviar e-mail de
+// recuperação quando o cliente sai sem finalizar a compra.
+
+model AbandonedCart {
+  id          String    @id @default(cuid())
+  items       Json      // CartItem[] serializado
+  subtotal    Decimal   @db.Decimal(10, 2)
+  emailSentAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([emailSentAt, updatedAt])
 }
 
 model ProductImage {
