@@ -1,6 +1,7 @@
 import Image from "next/image"
 import { useCartStore } from "@/store/cart"
 import { formatPrice } from "@/lib/utils"
+import { useSession } from "next-auth/react"
 
 type Props = {
   shippingCost?: number
@@ -8,8 +9,15 @@ type Props = {
 }
 
 export function OrderSummary({ shippingCost, discount = 0 }: Props) {
-  const { items, subtotal } = useCartStore()
-  const sub = subtotal()
+  const { items } = useCartStore()
+  const { data: session, status } = useSession()
+  const isWholesale = status === "authenticated"
+    && session?.user.role === "WHOLESALE"
+    && session.user.wholesaleApproved === true
+  const sub = items.reduce((sum, item) => {
+    const price = isWholesale && item.wholesalePrice ? item.wholesalePrice : item.retailPrice
+    return sum + price * item.quantity
+  }, 0)
   const total = sub - discount + (shippingCost ?? 0)
 
   return (
@@ -19,7 +27,7 @@ export function OrderSummary({ shippingCost, discount = 0 }: Props) {
       {/* Items */}
       <div className="space-y-3 max-h-60 overflow-y-auto">
         {items.map((item) => {
-          const price = item.wholesalePrice ?? item.retailPrice
+          const price = isWholesale && item.wholesalePrice ? item.wholesalePrice : item.retailPrice
           return (
             <div key={`${item.productId}-${item.size}`} className="flex gap-3">
               <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-bg-blush shrink-0">
