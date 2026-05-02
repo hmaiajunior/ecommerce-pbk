@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 type Category  = { id: string; name: string; slug: string }
 type AgeRange  = { id: string; name: string }
 
-const SIZES = ["RN", "P", "M", "G", "GG", "1", "2", "4", "6", "8", "10", "12", "14", "16"]
+const SIZES = ["0","2","4","6","8","10","12"]
 
 const PRICE_RANGES = [
   { label: "Até R$ 50",        min: undefined,  max: 50  },
