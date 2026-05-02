@@ -76,6 +76,7 @@ export default function AdminProdutosPage() {
 
   function openEdit(p: Product) {
     setEditing(p)
+    const stockMap = new Map(p.sizes.map(s => [s.size, s.stock]))
     setForm({
       name: p.name, description: "", fabric: "",
       retailPrice: String(p.retailPrice),
@@ -83,7 +84,7 @@ export default function AdminProdutosPage() {
       wholesaleMinQty: "",
       categoryId: p.category.id, ageRangeId: p.ageRange.id,
       featured: p.featured, active: p.active,
-      sizes: p.sizes.length ? p.sizes : SIZE_LIST.map(s => ({ size: s, stock: 0 })),
+      sizes: SIZE_LIST.map(s => ({ size: s, stock: stockMap.get(s) ?? 0 })),
     })
     setFormErr("")
   }
