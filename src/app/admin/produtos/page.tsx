@@ -20,7 +20,7 @@ type Product   = {
   _count: { orderItems: number }
 }
 
-const SIZE_LIST = ["0","2","4","6","8","10","12"]
+const SIZE_LIST = ["1","2","4","6","8","10","12"]
 
 const EMPTY_FORM = {
   name: "", description: "", fabric: "",
