@@ -1,9 +1,10 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState } from "react"
 import Image from "next/image"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { Plus, Edit2, Trash2, Image as ImageIcon, X, Search } from "lucide-react"
+import { Plus, Edit2, Trash2, X, Search } from "lucide-react"
+import { ImageUploader } from "@/components/admin/ImageUploader"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -32,13 +33,11 @@ const EMPTY_FORM = {
 
 export default function AdminProdutosPage() {
   const qc = useQueryClient()
-  const fileRef = useRef<HTMLInputElement>(null)
   const [search, setSearch] = useState("")
   const [editing, setEditing] = useState<Product | "new" | null>(null)
   const [form, setForm] = useState(EMPTY_FORM)
   const [saving, setSaving] = useState(false)
   const [formErr, setFormErr] = useState("")
-  const [uploadingFor, setUploadingFor] = useState<string | null>(null)
 
   const { data: products, isLoading } = useQuery<Product[]>({
     queryKey: ["admin-products", search],
@@ -59,12 +58,6 @@ export default function AdminProdutosPage() {
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => fetch(`/api/admin/products/${id}`, { method: "DELETE" }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-products"] }),
-  })
-
-  const deleteImageMutation = useMutation({
-    mutationFn: ({ productId, imageId }: { productId: string; imageId: string }) =>
-      fetch(`/api/admin/products/${productId}/images/${imageId}`, { method: "DELETE" }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-products"] }),
   })
 
@@ -122,41 +115,6 @@ export default function AdminProdutosPage() {
     }
     qc.invalidateQueries({ queryKey: ["admin-products"] })
     setEditing(null)
-  }
-
-  const [uploadStatus, setUploadStatus] = useState<"idle" | "uploading" | "success" | "error">("idle")
-  const [uploadMsg, setUploadMsg] = useState("")
-
-  async function handleImageUpload(productId: string, file: File) {
-    setUploadingFor(productId)
-    setUploadStatus("uploading")
-    setUploadMsg("")
-    const fd = new FormData()
-    fd.append("file", file)
-    const res = await fetch(`/api/admin/products/${productId}/images`, { method: "POST", body: fd })
-    const json = await res.json().catch(() => ({}))
-    setUploadingFor(null)
-    if (!res.ok) {
-      setUploadStatus("error")
-      setUploadMsg(json.error ?? "Erro ao enviar imagem.")
-    } else {
-      setUploadStatus("success")
-      setUploadMsg("Imagem enviada com sucesso!")
-      setTimeout(() => setUploadStatus("idle"), 3000)
-    }
-    qc.invalidateQueries({ queryKey: ["admin-products"] })
-  }
-
-  async function handleMultiUpload(files: File[], productId: string, currentCount: number) {
-    const slots = 5 - currentCount
-    const toUpload = files.slice(0, slots)
-    for (const file of toUpload) {
-      await handleImageUpload(productId, file)
-    }
-    if (files.length > slots) {
-      setUploadStatus("error")
-      setUploadMsg(`Limite de 5 imagens atingido. ${files.length - slots} arquivo(s) ignorado(s).`)
-    }
   }
 
   return (
@@ -233,48 +191,10 @@ export default function AdminProdutosPage() {
           {/* Imagens (apenas ao editar) */}
           {editing !== "new" && (
             <div className="mt-5">
-              <p className="text-xs font-black uppercase tracking-wider text-brown-muted mb-3">
-                Imagens <span className="text-brown-light font-semibold normal-case tracking-normal">({(editing as Product).images.length}/5)</span>
-              </p>
-              <div className="flex flex-wrap gap-3">
-                {(editing as Product).images.map(img => (
-                  <div key={img.id} className="relative w-20 h-20 rounded-lg overflow-hidden bg-bg-blush">
-                    <Image src={img.url} alt={img.alt ?? ""} fill sizes="80px" className="object-cover" />
-                    <button
-                      onClick={() => deleteImageMutation.mutate({ productId: (editing as Product).id, imageId: img.id })}
-                      className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600"
-                    >
-                      <X size={10} />
-                    </button>
-                  </div>
-                ))}
-                {(editing as Product).images.length < 5 && (
-                  <>
-                    <button
-                      onClick={() => fileRef.current?.click()}
-                      disabled={!!uploadingFor}
-                      className="w-20 h-20 rounded-lg border-2 border-dashed border-bg-nude flex flex-col items-center justify-center text-brown-muted hover:border-primary hover:text-primary transition-colors disabled:opacity-50"
-                    >
-                      <ImageIcon size={18} />
-                      <span className="text-[10px] font-bold mt-1">{uploadingFor ? "..." : "Adicionar"}</span>
-                    </button>
-                    <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" multiple className="hidden"
-                      onChange={async e => {
-                        const files = Array.from(e.target.files ?? [])
-                        if (files.length > 0) {
-                          await handleMultiUpload(files, (editing as Product).id, (editing as Product).images.length)
-                        }
-                        e.target.value = ""
-                      }}
-                    />
-                  </>
-                )}
-              </div>
-              {uploadStatus !== "idle" && (
-                <p className={`text-xs font-bold mt-2 ${uploadStatus === "success" ? "text-green-600" : uploadStatus === "error" ? "text-red-500" : "text-brown-muted"}`}>
-                  {uploadStatus === "uploading" ? "Enviando imagem..." : uploadMsg}
-                </p>
-              )}
+              <ImageUploader
+                productId={(editing as Product).id}
+                images={(editing as Product).images}
+              />
             </div>
           )}
 
