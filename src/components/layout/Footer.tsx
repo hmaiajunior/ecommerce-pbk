@@ -35,12 +35,12 @@ export function Footer() {
             </p>
             <div className="mt-4">
               <a
-                href="https://instagram.com/playbekids2"
+                href="https://instagram.com/playbekids"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 bg-primary text-white font-extrabold text-sm px-4 py-1.5 rounded-pill hover:bg-primary-hover transition-colors"
               >
-                @playbekids2
+                @playbekids
               </a>
             </div>
           </div>
@@ -98,7 +98,7 @@ export function Footer() {
             © {new Date().getFullYear()} Playbekids. Todos os direitos reservados.
           </p>
           <p className="font-extrabold text-[13px] text-secondary">
-            Instagram: @playbekids2
+            Instagram: @playbekids
           </p>
         </div>
       </div>

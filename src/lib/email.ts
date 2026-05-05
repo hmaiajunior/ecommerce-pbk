@@ -97,7 +97,7 @@ export async function sendOrderCancellationEmail(
       </table>
       <p style="margin-top:24px;">Você pode realizar um novo pedido a qualquer momento acessando nossa loja:</p>
       <p><a href="${APP_URL}/produtos" style="color:#FF6B4A;font-weight:700;">Voltar para a loja →</a></p>
-      <p style="color:#9A7B70;font-size:12px;">Se tiver dúvidas, entre em contato pelo Instagram @playbekids2.</p>
+      <p style="color:#9A7B70;font-size:12px;">Se tiver dúvidas, entre em contato pelo Instagram @playbekids.</p>
     `,
   })
 }
@@ -167,7 +167,7 @@ export async function sendAbandonedCartEmail(
         </div>
 
         <p style="margin:24px 0 0;font-size:12px;color:#9A7B70;text-align:center;line-height:1.5;">
-          Se tiver dúvidas, fale com a gente no Instagram <strong>@playbekids2</strong>.<br/>
+          Se tiver dúvidas, fale com a gente no Instagram <strong>@playbekids</strong>.<br/>
           Você está recebendo este e-mail porque iniciou uma compra na Playbekids.
         </p>
       </div>

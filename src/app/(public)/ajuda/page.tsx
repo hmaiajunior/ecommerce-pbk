@@ -49,7 +49,7 @@ const sections = [
     title: "Fale Conosco",
     items: [
       { q: "WhatsApp", a: "Atendimento de segunda a sexta, das 9h às 18h." },
-      { q: "Instagram", a: "@playbekids2 — responderemos no direct." },
+      { q: "Instagram", a: "@playbekids — responderemos no direct." },
       { q: "E-mail", a: "contato@playbekids.com.br" },
     ],
   },
