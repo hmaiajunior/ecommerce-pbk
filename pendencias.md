@@ -14,15 +14,15 @@ Copie `.env.example` para `.env` e preencha cada item abaixo.
 | `DATABASE_URL` | Já preenchida para Docker local | Alterar para produção |
 | `REDIS_URL` | Já preenchida para Docker local | Alterar para produção |
 
-### Mercado Pago
+### InfinitePay
 
 | Variável | Como obter | Observação |
 |---|---|---|
-| `MERCADOPAGO_ACCESS_TOKEN` | [mercadopago.com.br/developers](https://www.mercadopago.com.br/developers) → Suas integrações → Credenciais | Usar `TEST-xxx` para sandbox |
-| `MERCADOPAGO_WEBHOOK_SECRET` | Painel MP → Suas integrações → Webhooks → criar webhook apontando para `https://seu-dominio.com/api/webhook/mercadopago` | Gerado ao configurar o webhook |
+| `INFINITEPAY_ACCESS_TOKEN` | [infinitepay.io](https://infinitepay.io) → Painel → Integrações → API | Usar token de sandbox para testes |
+| `INFINITEPAY_WEBHOOK_SECRET` | Painel InfinitePay → Webhooks → criar webhook apontando para `https://seu-dominio.com/api/webhook/infinitepay` | Gerado ao configurar o webhook |
 
-> **Ação necessária no painel do Mercado Pago:**
-> Configurar o webhook com a URL da aplicação e selecionar o evento `payment`. O secret gerado deve ser colocado em `MERCADOPAGO_WEBHOOK_SECRET`.
+> **Ação necessária no painel do InfinitePay:**
+> Configurar o webhook com a URL da aplicação e selecionar o evento de pagamento. O secret gerado deve ser colocado em `INFINITEPAY_WEBHOOK_SECRET`.
 
 ### Melhor Envio
 
@@ -101,11 +101,11 @@ Estas definições impactam diretamente o código. Precisam ser confirmadas ante
 
 | Item | Serviço sugerido | Ação necessária |
 |---|---|---|
-| **Hospedagem da aplicação** | Vercel | Criar conta, conectar repositório Git, configurar variáveis de ambiente |
-| **Banco de dados PostgreSQL** | Supabase ou Railway | Criar projeto, copiar `DATABASE_URL` para o `.env` de produção |
-| **Redis** | Upstash | Criar database Redis, copiar URL para `REDIS_URL` |
-| **Domínio** | Registro.br ou similar | Registrar domínio, apontar DNS para Vercel |
-| **CDN / Proteção** | Cloudflare (gratuito) | Configurar domínio na Cloudflare antes de apontar para Vercel |
+| **Hospedagem da aplicação** | Vercel | ✅ Configurado |
+| **Banco de dados PostgreSQL** | Supabase | ✅ Configurado |
+| **Redis** | Upstash | ✅ Configurado |
+| **Domínio** | Registro.br ou similar | ✅ www.playbekids.com.br ativo |
+| **CDN / Proteção** | Cloudflare (gratuito) | ✅ R2 configurado |
 
 > **Atenção:** Configure o Cloudflare como proxy entre o domínio e a Vercel. Isso ativa o cache de assets gratuitamente e protege contra DDoS.
 
@@ -113,9 +113,9 @@ Estas definições impactam diretamente o código. Precisam ser confirmadas ante
 
 ## 4. Git e Repositório
 
-- [ ] Criar repositório no GitHub (ou GitLab/Bitbucket)
-- [ ] Fazer o primeiro commit (`git init && git add . && git commit`)
-- [ ] Conectar repositório à Vercel para deploy automático a cada push na branch `main`
+- [x] Criar repositório no GitHub
+- [x] Fazer o primeiro commit
+- [x] Conectar repositório à Vercel para deploy automático
 
 ---
 
@@ -147,7 +147,7 @@ Lista de todas as contas em serviços externos que precisam existir antes do go-
 
 | Serviço | URL | Para quê |
 |---|---|---|
-| Mercado Pago | mercadopago.com.br/developers | Pagamentos |
+| InfinitePay | infinitepay.io | Pagamentos |
 | Melhor Envio | melhorenvio.com.br | Cálculo de frete |
 | Resend | resend.com | E-mails transacionais |
 | Cloudflare | cloudflare.com | CDN + R2 (imagens) |
@@ -159,10 +159,10 @@ Lista de todas as contas em serviços externos que precisam existir antes do go-
 
 ## 8. Testes Antes do Go-Live
 
-- [ ] Testar pagamento Pix em sandbox do Mercado Pago
+- [ ] Testar pagamento Pix em sandbox do InfinitePay
 - [ ] Testar pagamento cartão (aprovado e recusado) em sandbox
 - [ ] Testar boleto em sandbox
-- [ ] Confirmar que o webhook do Mercado Pago atualiza o status do pedido corretamente
+- [ ] Confirmar que o webhook do InfinitePay atualiza o status do pedido corretamente
 - [ ] Testar cálculo de frete com CEPs reais
 - [ ] Testar fluxo completo: cadastro → login → produto → carrinho → checkout → pagamento → e-mail
 - [ ] Testar aprovação manual de conta atacado pelo admin
