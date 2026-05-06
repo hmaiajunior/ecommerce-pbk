@@ -94,12 +94,19 @@ export function Footer() {
 
         {/* Bottom */}
         <div className="flex flex-col sm:flex-row justify-between items-center gap-2">
-          <p className="font-semibold text-[13px] text-brown-muted">
-            © {new Date().getFullYear()} Playbekids. Todos os direitos reservados.
-          </p>
-          <p className="font-extrabold text-[13px] text-secondary">
-            Instagram: @playbekids
-          </p>
+          <div className="flex flex-col items-center sm:items-start gap-1">
+            <p className="font-semibold text-[13px] text-brown-muted">
+              © {new Date().getFullYear()} Playbekids. Todos os direitos reservados.
+            </p>
+            <p className="font-semibold text-[12px] text-brown-muted">
+              CNPJ: 35.490.656/0001-14
+            </p>
+          </div>
+          <div className="flex items-center gap-4">
+            <Link href="/privacidade" className="font-semibold text-[12px] text-brown-muted hover:text-white transition-colors">Privacidade</Link>
+            <Link href="/termos" className="font-semibold text-[12px] text-brown-muted hover:text-white transition-colors">Termos de Uso</Link>
+            <p className="font-extrabold text-[13px] text-secondary">@playbekids</p>
+          </div>
         </div>
       </div>
     </footer>
